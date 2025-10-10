@@ -31,6 +31,8 @@ templates/
 │   └── userstory-template.md
 ├── 3-design/
 │   ├── design-vision-template.md
+│   ├── interaction-flow-template.md
+│   ├── prototype-links-template.md
 │   ├── component-template.md
 │   ├── pattern-template.md
 │   └── workflow-template.md
@@ -57,6 +59,8 @@ templates/
 | [1-vision/SuccessMetrics.md](1-vision/SuccessMetrics.md) | [templates/1-vision/success-metrics-template.md](templates/1-vision/success-metrics-template.md) |
 | [2-product/Epics/*.md](2-product/Epics/) | [templates/2-product/epic-template.md](templates/2-product/epic-template.md) |
 | [3-design/DesignVision.md](3-design/DesignVision.md) | [templates/3-design/design-vision-template.md](templates/3-design/design-vision-template.md) |
+| [3-design/InteractionFlow.md](3-design/InteractionFlow.md) | [templates/3-design/interaction-flow-template.md](templates/3-design/interaction-flow-template.md) |
+| [3-design/PrototypeLinks.md](3-design/PrototypeLinks.md) | [templates/3-design/prototype-links-template.md](templates/3-design/prototype-links-template.md) |
 | [4-technology/Architecture.md](4-technology/Architecture.md) | [templates/4-technology/architecture-template.md](templates/4-technology/architecture-template.md) |
 
 ---
