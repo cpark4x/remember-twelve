@@ -299,7 +299,8 @@ def get_permissive_config() -> QualityAnalyzerConfig:
     return create_custom_config(
         thresholds={
             'high_quality_min': 60.0,
-            'acceptable_min': 40.0
+            'acceptable_min': 40.0,
+            'low_quality_max': 39.0  # Must be less than acceptable_min
         }
     )
 

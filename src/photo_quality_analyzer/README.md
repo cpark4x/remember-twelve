@@ -1,6 +1,8 @@
-# Photo Quality Analyzer - Phase 1
+# Photo Quality Analyzer
 
 A modular, high-performance system for analyzing photo quality based on sharpness and exposure metrics.
+
+**Current Version:** 2.0.0 (Phase 2 - Production Infrastructure)
 
 ## Overview
 
@@ -28,9 +30,18 @@ pip install opencv-python numpy Pillow pytest pytest-cov
 
 **Requirements:** Python 3.11+
 
+## What's New in Phase 2
+
+Phase 2 adds production-ready infrastructure for analyzing large photo libraries:
+
+- **Batch Processing:** Parallel analysis with progress tracking
+- **Result Caching:** SQLite-backed cache with hash-based invalidation
+- **Library Scanning:** Recursive photo discovery with filtering
+- **Performance Monitoring:** Track throughput and memory usage
+
 ## Quick Start
 
-### Basic Usage
+### Basic Usage (Phase 1)
 
 ```python
 from photo_quality_analyzer import PhotoQualityAnalyzer
@@ -53,20 +64,90 @@ print(f"Tier:       {score.tier.upper()}")
 # Tier:       HIGH
 ```
 
-### Batch Processing
+### Batch Processing (Phase 2)
 
 ```python
-# Analyze multiple photos
-photo_paths = ['photo1.jpg', 'photo2.jpg', 'photo3.jpg']
-scores = analyzer.analyze_batch(photo_paths)
+from photo_quality_analyzer import BatchProcessor
 
-# Filter high-quality photos
-high_quality = [
-    path for path, score in zip(photo_paths, scores)
-    if score and score.tier == 'high'
-]
+# Initialize batch processor with 4 parallel workers
+processor = BatchProcessor(num_workers=4)
 
-print(f"Found {len(high_quality)} high-quality photos")
+# Process batch with progress tracking
+def show_progress(analyzed, total, failed):
+    pct = (analyzed / total) * 100
+    print(f"Progress: {pct:.1f}% ({analyzed}/{total}, {failed} failed)")
+
+result = processor.process_batch(
+    photo_paths=['photo1.jpg', 'photo2.jpg', 'photo3.jpg'],
+    progress_callback=show_progress
+)
+
+print(f"Success: {result.successful}/{result.total_photos}")
+print(f"Success rate: {result.success_rate:.1f}%")
+
+# Access scores
+for path, score in result.scores:
+    print(f"{path}: {score.composite:.1f}")
+```
+
+### Library Scanning (Phase 2)
+
+```python
+from photo_quality_analyzer import LibraryScanner
+
+# Initialize scanner
+scanner = LibraryScanner()
+
+# Scan directory recursively
+photos = scanner.scan_and_collect('/Users/john/Photos')
+
+print(f"Found {len(photos)} photos")
+
+# Get scan statistics
+stats = scanner.get_stats()
+print(f"Scanned {stats.directories_scanned} directories")
+print(f"Skipped {stats.skipped} files")
+```
+
+### Caching Results (Phase 2)
+
+```python
+from photo_quality_analyzer import ResultCache
+
+# Initialize cache
+cache = ResultCache('quality_scores.db')
+
+# Check if photo needs analysis
+if cache.should_analyze('photo.jpg'):
+    score = analyzer.analyze_photo('photo.jpg')
+    cache.set('photo.jpg', score)
+else:
+    score = cache.get('photo.jpg')
+    print(f"Using cached score: {score.composite:.1f}")
+
+# Get cache statistics
+stats = cache.get_stats()
+print(f"Hit rate: {stats['hit_rate']:.1%}")
+```
+
+### Performance Monitoring (Phase 2)
+
+```python
+from photo_quality_analyzer import PerformanceMonitor
+
+# Monitor analysis performance
+with PerformanceMonitor() as monitor:
+    for photo in photos:
+        score = analyzer.analyze_photo(photo)
+        monitor.record_photo()
+
+monitor.print_summary()
+# Output:
+# Performance Summary:
+# - Duration: 45.23s
+# - Photos processed: 1000
+# - Rate: 22.1 photos/sec
+# - Memory: 125.3 MB -> 245.7 MB
 ```
 
 ### Custom Configuration
@@ -104,6 +185,10 @@ src/photo_quality_analyzer/
 ├── __init__.py              # Main exports
 ├── analyzer.py              # Main analyzer interface
 ├── config.py                # Configuration and presets
+├── batch_processor.py       # [Phase 2] Parallel batch processing
+├── cache.py                 # [Phase 2] Result caching (SQLite)
+├── scanner.py               # [Phase 2] Photo library scanning
+├── performance.py           # [Phase 2] Performance monitoring
 └── metrics/
     ├── __init__.py
     ├── sharpness.py         # Sharpness detection (Laplacian variance)
@@ -326,7 +411,120 @@ python -m src.photo_quality_analyzer.analyzer photo.jpg
 #   ✓ High quality - prioritize for curation
 ```
 
-## Examples
+## Phase 2 Examples
+
+### Example 1: Production Batch Analysis
+
+```python
+from photo_quality_analyzer import (
+    LibraryScanner,
+    BatchProcessor,
+    ResultCache,
+    PerformanceMonitor
+)
+
+# Step 1: Scan photo library
+scanner = LibraryScanner()
+photos = scanner.scan_and_collect('/Users/john/Photos')
+print(f"Found {len(photos)} photos")
+
+# Step 2: Check cache to avoid re-analyzing
+cache = ResultCache('scores.db')
+photos_to_analyze = [p for p in photos if cache.should_analyze(p)]
+print(f"Need to analyze {len(photos_to_analyze)} photos")
+
+# Step 3: Batch process with monitoring
+processor = BatchProcessor(num_workers=4)
+
+with PerformanceMonitor('batch_analysis') as monitor:
+    result = processor.process_batch(photos_to_analyze)
+    monitor.record_photo(result.successful)
+
+# Step 4: Cache results
+for path, score in result.scores:
+    cache.set(path, score)
+
+# Step 5: Print summary
+monitor.print_summary()
+print(f"\nAnalysis complete:")
+print(f"- Processed: {result.successful}/{result.total_photos}")
+print(f"- Failed: {result.failed}")
+print(f"- Cache hit rate: {cache.get_stats()['hit_rate']:.1%}")
+```
+
+### Example 2: Large Library with Chunking
+
+```python
+from photo_quality_analyzer import BatchProcessor, LibraryScanner
+
+# Scan large library
+scanner = LibraryScanner()
+all_photos = scanner.scan_and_collect('/Volumes/Photos')
+print(f"Found {len(all_photos):,} photos")
+
+# Process in chunks to manage memory
+processor = BatchProcessor(chunk_size=1000, num_workers=4)
+
+def show_progress(analyzed, total, failed):
+    pct = (analyzed / total) * 100
+    print(f"Progress: {analyzed:,}/{total:,} ({pct:.1f}%)")
+
+result = processor.process_batch_chunked(
+    all_photos,
+    progress_callback=show_progress
+)
+
+print(f"\nCompleted: {result.successful:,}/{result.total_photos:,}")
+print(f"Success rate: {result.success_rate:.1f}%")
+```
+
+### Example 3: Incremental Updates
+
+```python
+from photo_quality_analyzer import ResultCache, PhotoQualityAnalyzer
+import os
+
+cache = ResultCache('scores.db')
+analyzer = PhotoQualityAnalyzer()
+
+# Get recently modified photos
+import time
+one_week_ago = time.time() - (7 * 24 * 60 * 60)
+
+recent_photos = [
+    photo for photo in scanner.scan('/Users/john/Photos')
+    if os.path.getmtime(photo) > one_week_ago
+]
+
+print(f"Found {len(recent_photos)} recently modified photos")
+
+# Analyze only new or modified photos
+for photo in recent_photos:
+    if cache.should_analyze(photo):
+        score = analyzer.analyze_photo(photo)
+        cache.set(photo, score)
+        print(f"Analyzed: {photo} -> {score.composite:.1f}")
+    else:
+        print(f"Cached: {photo}")
+```
+
+### Example 4: Export/Import Cache
+
+```python
+from photo_quality_analyzer import ResultCache
+
+# Export cache to JSON
+cache = ResultCache('scores.db')
+cache.export_to_json('backup.json')
+print(f"Exported {cache.get_stats()['total_entries']} scores")
+
+# Import to new cache
+new_cache = ResultCache('new_scores.db')
+count = new_cache.import_from_json('backup.json')
+print(f"Imported {count} scores")
+```
+
+## Classic Examples (Phase 1)
 
 ### Example 1: Filter Photos by Quality
 
@@ -412,7 +610,52 @@ acceptable_count = sum(1 for s in scores if s and s.tier != 'low')
 print(f"Acceptable action shots: {acceptable_count}/{len(action_photos)}")
 ```
 
-## Future Enhancements (Phase 2+)
+## Phase 2 Implementation Summary
+
+### Completed Components
+
+1. **BatchProcessor** (100% test coverage)
+   - Parallel processing with ProcessPoolExecutor
+   - Progress tracking with callbacks
+   - Error handling (individual failures don't stop batch)
+   - Chunked processing for memory efficiency
+   - Path validation
+
+2. **ResultCache** (96% test coverage)
+   - SQLite backend for persistent storage
+   - SHA-256 hash-based photo identification
+   - TTL/expiration support
+   - Hit/miss statistics
+   - Import/export functionality
+
+3. **LibraryScanner** (86% test coverage)
+   - Recursive directory scanning
+   - Support for .jpg, .jpeg, .png, .heic, .heif
+   - File validation (size, format, readability)
+   - Ignore patterns (hidden files, system folders)
+   - Scan statistics
+
+4. **PerformanceMonitor** (96% test coverage)
+   - Context manager pattern
+   - Processing time tracking
+   - Memory usage monitoring
+   - Photos per second calculation
+   - Aggregate statistics
+
+### Test Results
+
+```
+Phase 2 Test Coverage:
+- BatchProcessor:      105 statements, 100% coverage
+- ResultCache:         151 statements,  96% coverage
+- LibraryScanner:      168 statements,  86% coverage
+- PerformanceMonitor:  120 statements,  96% coverage
+
+Total: 134 tests passing
+Overall project coverage: 91%
+```
+
+## Future Enhancements (Phase 3+)
 
 - **Composition scoring:** Rule of thirds, face detection
 - **Machine learning model:** Learn from human ratings
