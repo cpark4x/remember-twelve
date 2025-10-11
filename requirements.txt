@@ -1,0 +1,16 @@
+# Photo Quality Analyzer - Phase 1 Dependencies
+# Python 3.11+ required
+
+# Core image processing
+opencv-python>=4.8.0,<5.0.0       # Computer vision library for Laplacian and histogram
+numpy>=1.24.0,<2.0.0               # Array operations and numerical computing
+Pillow>=10.0.0,<11.0.0             # Image loading for additional format support
+
+# Testing dependencies
+pytest>=7.4.0,<8.0.0               # Unit testing framework
+pytest-cov>=4.1.0,<5.0.0           # Code coverage for tests
+
+# Development dependencies (optional)
+# black>=23.0.0                    # Code formatting
+# mypy>=1.5.0                      # Type checking
+# pylint>=2.17.0                   # Code linting
