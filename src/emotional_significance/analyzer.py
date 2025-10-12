@@ -12,7 +12,7 @@ Usage:
     >>> print(f"Emotional significance: {score.composite:.1f} ({score.tier})")
 """
 
-from typing import Union, Optional, List, Tuple
+from typing import Union, Optional, List, Tuple, Any
 from pathlib import Path
 import numpy as np
 import cv2
@@ -230,8 +230,8 @@ class EmotionalAnalyzer:
         Analyze multiple photos and return their emotional significance scores.
 
         Note: This is a simple sequential implementation for Phase 1.
-        For parallel processing of large batches, use the BatchProcessor
-        in future phases.
+        For parallel processing of large batches, use analyze_batch_parallel()
+        or EmotionalBatchProcessor directly.
 
         Args:
             photo_paths: List of paths to photo files
@@ -257,6 +257,59 @@ class EmotionalAnalyzer:
                 # Log error and continue with next photo
                 logger.warning(f"Failed to analyze {photo_path}: {e}")
                 scores.append(None)
+
+        return scores
+
+    def analyze_batch_parallel(
+        self,
+        photo_paths: List[Union[str, Path]],
+        num_workers: int = 4,
+        progress_callback: Optional[Any] = None
+    ) -> List[Optional[EmotionalScore]]:
+        """
+        Analyze multiple photos in parallel using BatchProcessor.
+
+        This method provides parallel processing with significantly better
+        performance for large batches compared to analyze_batch().
+
+        Args:
+            photo_paths: List of paths to photo files
+            num_workers: Number of parallel workers (defaults to 4)
+            progress_callback: Optional callback(analyzed, total, failed) for progress
+
+        Returns:
+            List[Optional[EmotionalScore]]: Scores for each photo (same order)
+                                            None if photo couldn't be analyzed
+
+        Examples:
+            >>> analyzer = EmotionalAnalyzer()
+            >>> photos = ['photo1.jpg', 'photo2.jpg', 'photo3.jpg']
+            >>>
+            >>> # Simple usage
+            >>> scores = analyzer.analyze_batch_parallel(photos)
+            >>>
+            >>> # With progress tracking
+            >>> def on_progress(analyzed, total, failed):
+            ...     print(f"Progress: {analyzed}/{total}")
+            >>> scores = analyzer.analyze_batch_parallel(
+            ...     photos,
+            ...     num_workers=4,
+            ...     progress_callback=on_progress
+            ... )
+        """
+        from .batch_processor import EmotionalBatchProcessor
+
+        processor = EmotionalBatchProcessor(num_workers=num_workers, config=self.config)
+        result = processor.process_batch(photo_paths, progress_callback=progress_callback)
+
+        # Create a map of path -> score for successful analyses
+        score_map = {path: score for path, score in result.scores}
+
+        # Return scores in original order, None for failed photos
+        scores = []
+        for path in photo_paths:
+            path_str = str(path)
+            scores.append(score_map.get(path_str))
 
         return scores
 
