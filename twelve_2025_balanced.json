@@ -1,0 +1,203 @@
+{
+  "year": 2025,
+  "strategy": "balanced",
+  "created_at": "2025-10-12T21:35:27.202522",
+  "stats": {
+    "total_candidates": 95,
+    "avg_quality": 99.6843625966286,
+    "avg_emotional": 4.534130732218425,
+    "avg_combined": 42.594223477982496,
+    "months_represented": 3,
+    "photos_with_faces": 1,
+    "photos_with_smiles": 0,
+    "diversity_score": 0.4290095828288818,
+    "min_quality": 96.21235115954332,
+    "max_quality": 100.0,
+    "min_emotional": 0.0,
+    "max_emotional": 54.409568786621094,
+    "min_combined": 40.0,
+    "max_combined": 71.13068173578998
+  },
+  "photos": [
+    {
+      "photo_path": "/Users/chrispark/Desktop/Chris.png",
+      "timestamp": "2025-07-22T10:21:49.228930",
+      "month": 7,
+      "quality_score": 96.21,
+      "emotional_score": 54.41,
+      "combined_score": 71.13,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "medium",
+        "has_faces": true,
+        "face_count": 1,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/IMG_7294.jpeg",
+      "timestamp": "2025-08-18T18:38:37",
+      "month": 8,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/IMG_8722.jpeg",
+      "timestamp": "2025-08-18T19:27:31",
+      "month": 8,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-10 at 2.53.55\u202fPM.png",
+      "timestamp": "2025-10-10T14:54:01.276144",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-07 at 8.35.44\u202fAM.png",
+      "timestamp": "2025-10-07T08:36:00.317193",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-07 at 2.41.46\u202fPM.png",
+      "timestamp": "2025-10-07T14:41:51.195611",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-09 at 3.11.26\u202fPM.png",
+      "timestamp": "2025-10-09T15:11:31.651653",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-09 at 3.15.01\u202fPM.png",
+      "timestamp": "2025-10-09T15:15:07.582376",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-09 at 3.16.30\u202fPM.png",
+      "timestamp": "2025-10-09T15:16:36.054994",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-06 at 1.34.11\u202fPM.png",
+      "timestamp": "2025-10-06T13:34:16.741411",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-09 at 3.12.58\u202fPM.png",
+      "timestamp": "2025-10-09T15:13:04.599164",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    },
+    {
+      "photo_path": "/Users/chrispark/Desktop/Screenshot 2025-10-10 at 2.51.42\u202fPM.png",
+      "timestamp": "2025-10-10T14:51:48.710474",
+      "month": 10,
+      "quality_score": 100.0,
+      "emotional_score": 0.0,
+      "combined_score": 40.0,
+      "metadata": {
+        "quality_tier": "high",
+        "emotional_tier": "low",
+        "has_faces": false,
+        "face_count": 0,
+        "has_positive_emotion": false
+      }
+    }
+  ]
+}
