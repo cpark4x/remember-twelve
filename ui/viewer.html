@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remember Twelve - 2025</title>
+
+    <!-- Material Design CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 24px 0;
+            margin-bottom: 32px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .year-title {
+            font-size: 48px;
+            font-weight: 300;
+            margin: 0;
+            color: #667eea;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+            margin: 8px 0 0 0;
+        }
+
+        .stats-row {
+            margin-top: 16px;
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            background: #f5f5f5;
+            padding: 8px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .stat-chip .material-icons {
+            font-size: 16px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
+        .container-custom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 48px 24px;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .photo-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .photo-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+        }
+
+        .photo-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 48px;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .card-month {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #667eea;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .card-date {
+            font-size: 14px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .card-filename {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            font-family: monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .score-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .score-badge {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .score-badge.high {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .score-badge.medium {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .score-badge.low {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .score-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .score-value {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .photo-wrapper {
+            position: relative;
+        }
+
+        .timeline {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .timeline-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .months-row {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .month-pill {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            color: #999;
+            font-size: 13px;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .month-pill.active {
+            background: #667eea;
+            color: white;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .photo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .year-title {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-content">
+        <h1 class="year-title">2025</h1>
+        <p class="subtitle">Your year in twelve unforgettable moments</p>
+
+        <div class="stats-row">
+            <div class="stat-chip">
+                <i class="material-icons">photo_camera</i>
+                12 photos selected
+            </div>
+            <div class="stat-chip">
+                <i class="material-icons">calendar_today</i>
+                3 months represented
+            </div>
+            <div class="stat-chip">
+                <i class="material-icons">star</i>
+                Avg score: 42.6/100
+            </div>
+            <div class="stat-chip">
+                <i class="material-icons">face</i>
+                1 with faces
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-custom">
+    <!-- Timeline -->
+    <div class="timeline">
+        <div class="timeline-title">Monthly Distribution</div>
+        <div class="months-row">
+            <div class="month-pill">Jan</div>
+            <div class="month-pill">Feb</div>
+            <div class="month-pill">Mar</div>
+            <div class="month-pill">Apr</div>
+            <div class="month-pill">May</div>
+            <div class="month-pill">Jun</div>
+            <div class="month-pill active">Jul</div>
+            <div class="month-pill active">Aug</div>
+            <div class="month-pill">Sep</div>
+            <div class="month-pill active">Oct</div>
+            <div class="month-pill">Nov</div>
+            <div class="month-pill">Dec</div>
+        </div>
+    </div>
+
+    <!-- Photo Grid -->
+    <div class="photo-grid">
+        <!-- Photo 1: Chris.png -->
+        <div class="photo-card">
+            <div class="photo-wrapper">
+                <div class="rank-badge">1</div>
+                <div class="photo-placeholder">📸</div>
+            </div>
+            <div class="card-content">
+                <div class="card-month">JULY</div>
+                <div class="card-date">July 22, 2025</div>
+                <div class="card-filename">Chris.png</div>
+
+                <div class="score-row">
+                    <div class="score-badge high">
+                        <div class="score-label">Combined</div>
+                        <div class="score-value">71</div>
+                    </div>
+                    <div class="score-badge high">
+                        <div class="score-label">Quality</div>
+                        <div class="score-value">96</div>
+                    </div>
+                    <div class="score-badge medium">
+                        <div class="score-label">Emotional</div>
+                        <div class="score-value">54</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photos 2-12: Screenshots -->
+        <div class="photo-card">
+            <div class="photo-wrapper">
+                <div class="rank-badge">2</div>
+                <div class="photo-placeholder">🖼️</div>
+            </div>
+            <div class="card-content">
+                <div class="card-month">AUGUST</div>
+                <div class="card-date">August 18, 2025</div>
+                <div class="card-filename">IMG_7294.jpeg</div>
+                <div class="score-row">
+                    <div class="score-badge low">
+                        <div class="score-label">Combined</div>
+                        <div class="score-value">40</div>
+                    </div>
+                    <div class="score-badge high">
+                        <div class="score-label">Quality</div>
+                        <div class="score-value">100</div>
+                    </div>
+                    <div class="score-badge low">
+                        <div class="score-label">Emotional</div>
+                        <div class="score-value">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repeat for remaining photos (3-12) -->
+        <div class="photo-card">
+            <div class="photo-wrapper"><div class="rank-badge">3</div><div class="photo-placeholder">🖼️</div></div>
+            <div class="card-content">
+                <div class="card-month">AUGUST</div>
+                <div class="card-date">August 18, 2025</div>
+                <div class="score-row">
+                    <div class="score-badge low"><div class="score-label">Combined</div><div class="score-value">40</div></div>
+                    <div class="score-badge high"><div class="score-label">Quality</div><div class="score-value">100</div></div>
+                    <div class="score-badge low"><div class="score-label">Emotional</div><div class="score-value">0</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photos 4-12 (abbreviated) -->
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">4</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">5</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">6</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">7</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">8</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">9</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">10</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">11</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+        <div class="photo-card"><div class="photo-wrapper"><div class="rank-badge">12</div><div class="photo-placeholder">🖼️</div></div><div class="card-content"><div class="card-month">OCTOBER</div><div class="score-row"><div class="score-badge low"><div class="score-value">40</div></div><div class="score-badge high"><div class="score-value">100</div></div><div class="score-badge low"><div class="score-value">0</div></div></div></div></div>
+    </div>
+</div>
+
+<!-- Materialize JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+</body>
+</html>
