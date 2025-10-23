@@ -6,6 +6,15 @@ opencv-python>=4.8.0,<5.0.0       # Computer vision library for Laplacian and hi
 numpy>=1.24.0,<2.0.0               # Array operations and numerical computing
 Pillow>=10.0.0,<11.0.0             # Image loading for additional format support
 
+# Google Photos Integration (Feature 1.5)
+google-auth>=2.23.0,<3.0.0         # Google OAuth authentication
+google-auth-oauthlib>=1.1.0,<2.0.0 # OAuth flow helpers
+google-auth-httplib2>=0.1.1,<1.0.0 # HTTP transport for auth
+google-api-python-client>=2.100.0,<3.0.0  # Google Photos API client
+cryptography>=41.0.0,<42.0.0       # Token encryption (Fernet)
+keyring>=24.0.0,<25.0.0            # Secure key storage in OS keyring
+requests>=2.31.0,<3.0.0            # HTTP requests for downloads
+
 # Testing dependencies
 pytest>=7.4.0,<8.0.0               # Unit testing framework
 pytest-cov>=4.1.0,<5.0.0           # Code coverage for tests
