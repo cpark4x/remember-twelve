@@ -117,6 +117,85 @@ class TwelveCurator:
         # Phase 5: Create final selection
         return self._create_selection(year, final_selections[:12], candidates)
 
+    def curate_from_source(
+        self,
+        photo_source,  # PhotoSource interface
+        year: int,
+        strategy: Optional[str] = None,
+        progress_callback = None
+    ) -> TwelveSelection:
+        """
+        Curate 12 photos from a PhotoSource (local or cloud).
+
+        This is the new unified method that works with any PhotoSource
+        implementation (LocalPhotoSource, GooglePhotosSource, etc.).
+
+        Main curation algorithm:
+        1. Scan photos from source
+        2. Score all photos (quality + emotional)
+        3. Group by month
+        4. Select best from each month
+        5. Apply visual diversity filter
+        6. Return exactly 12 (or fewer if <12 available)
+
+        Args:
+            photo_source: PhotoSource instance (local or cloud)
+            year: Year being curated
+            strategy: Optional strategy override (balanced, aesthetic_first, people_first, top_heavy)
+            progress_callback: Optional callback(current, total, status_msg)
+
+        Returns:
+            TwelveSelection with exactly 12 photos (or fewer if <12 available)
+
+        Examples:
+            >>> from photo_sources import PhotoSourceFactory
+            >>> source = PhotoSourceFactory.create_google_photos('creds.json')
+            >>> source.authenticate()
+            >>> selection = curator.curate_from_source(source, year=2024)
+            >>> print(f"Selected {len(selection.photos)} photos")
+
+        Note: Automatically calls source.cleanup() after curation
+        """
+        # Apply strategy override if provided
+        if strategy:
+            self.config.strategy = strategy
+
+        try:
+            # Phase 1: Scan and score all photos from source
+            candidates = self._score_photos_from_source(
+                photo_source,
+                year,
+                progress_callback
+            )
+
+            if not candidates:
+                # No photos found - return empty selection
+                return self._create_empty_selection(year, 0)
+
+            if len(candidates) <= 12:
+                # Fewer than 12 photos - return all
+                return self._create_selection(year, candidates, candidates)
+
+            # Phase 2: Temporal distribution
+            temporal_selections = self._apply_temporal_distribution(candidates)
+
+            # Phase 3: Visual diversity
+            if self.config.enable_diversity_filter:
+                final_selections = self._apply_visual_diversity(temporal_selections)
+            else:
+                final_selections = temporal_selections[:12]
+
+            # Phase 4: Ensure exactly 12 (fill if needed)
+            if len(final_selections) < 12:
+                final_selections = self._fill_to_twelve(final_selections, candidates)
+
+            # Phase 5: Create final selection
+            return self._create_selection(year, final_selections[:12], candidates)
+
+        finally:
+            # Always cleanup source (temp files, etc.)
+            photo_source.cleanup()
+
     def preview_candidates(
         self,
         photo_paths: List[Path],
@@ -185,6 +264,98 @@ class TwelveCurator:
     # ========================================================================
     # Phase 1: Scoring
     # ========================================================================
+
+    def _score_photos_from_source(
+        self,
+        photo_source,  # PhotoSource interface
+        year: int,
+        progress_callback = None
+    ) -> List[PhotoCandidate]:
+        """
+        Score all photos from a PhotoSource.
+
+        Args:
+            photo_source: PhotoSource instance
+            year: Year to filter by
+            progress_callback: Optional callback(current, total, status_msg)
+
+        Returns:
+            List of PhotoCandidate objects
+        """
+        candidates = []
+        photo_count = 0
+
+        # Scan photos from source (downloads if cloud source)
+        for photo_path_str in photo_source.scan(year=year):
+            photo_count += 1
+
+            # Progress callback
+            if progress_callback:
+                progress_callback(
+                    photo_count,
+                    None,  # Total unknown during streaming
+                    f"Analyzing photo {photo_count}..."
+                )
+
+            try:
+                # Convert to Path
+                photo_path = Path(photo_path_str)
+
+                # Get metadata from source
+                source_metadata = photo_source.get_metadata(photo_path_str)
+                timestamp = source_metadata.get('timestamp')
+                month = source_metadata.get('month')
+
+                # Skip if wrong year (source filter may not be perfect)
+                if timestamp and timestamp.year != year:
+                    continue
+
+                # Analyze quality
+                quality_result = self.quality_analyzer.analyze_photo(str(photo_path))
+                quality_score = quality_result.composite
+
+                # Analyze emotional significance
+                emotional_result = self.emotional_analyzer.analyze_photo(str(photo_path))
+                emotional_score = emotional_result.composite
+
+                # Calculate combined score
+                combined_score = (
+                    quality_score * self.config.quality_weight +
+                    emotional_score * self.config.emotional_weight
+                )
+
+                # Filter by minimum score
+                if combined_score < self.config.min_combined_score:
+                    continue
+
+                # Create metadata
+                metadata = {
+                    'quality_tier': quality_result.tier,
+                    'emotional_tier': emotional_result.tier,
+                    'has_faces': emotional_result.face_count > 0,
+                    'face_count': emotional_result.face_count,
+                    'has_positive_emotion': emotional_result.has_positive_emotion,
+                    'original_url': photo_source.get_original_url(photo_path_str),  # NEW: Google Photos URL
+                    'source_metadata': source_metadata
+                }
+
+                candidate = PhotoCandidate(
+                    photo_path=photo_path,
+                    timestamp=timestamp,
+                    month=month,
+                    quality_score=quality_score,
+                    emotional_score=emotional_score,
+                    combined_score=combined_score,
+                    metadata=metadata
+                )
+                candidates.append(candidate)
+
+            except Exception as e:
+                # Skip photos that fail to analyze
+                print(f"Warning: Failed to analyze {photo_path_str}: {e}")
+                continue
+
+        return candidates
 
     def _score_all_photos(self, photo_paths: List[Path], year: int) -> List[PhotoCandidate]:
         """
