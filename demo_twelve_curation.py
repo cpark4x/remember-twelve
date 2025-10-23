@@ -40,14 +40,14 @@ def demo_curation(directory: str, year: int, strategy: str = "balanced"):
         print(f"❌ Directory not found: {directory}")
         return
 
-    # Find all photos
+    # Find all photos (recursively scan subdirectories)
     extensions = {'.jpg', '.jpeg', '.png', '.heic', '.heif'}
     photos = []
 
-    print(f"Scanning directory: {directory}")
+    print(f"Scanning directory (including subdirectories): {directory}")
     for ext in extensions:
-        photos.extend(photo_dir.glob(f'*{ext}'))
-        photos.extend(photo_dir.glob(f'*{ext.upper()}'))
+        photos.extend(photo_dir.rglob(f'*{ext}'))
+        photos.extend(photo_dir.rglob(f'*{ext.upper()}'))
 
     if not photos:
         print("❌ No photos found in directory")
