@@ -24,8 +24,6 @@ import requests
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
 
 from .token_manager import TokenManager
 from .exceptions import (
@@ -168,21 +166,12 @@ class GooglePhotosClient:
             except Exception as e:
                 raise AuthenticationError(f"OAuth flow failed: {e}")
 
-        # Initialize API service
-        try:
-            self.service = build(
-                self.API_SERVICE_NAME,
-                self.API_VERSION,
-                credentials=creds,
-                cache_discovery=False
-            )
-            self.credentials = creds
-            self.user_email = user_email or self._get_user_email(creds)
+        # Store credentials (we'll use REST API directly, not discovery)
+        self.credentials = creds
+        self.user_email = user_email or self._get_user_email(creds)
+        self.service = True  # Mark as initialized
 
-            return self.user_email
-
-        except Exception as e:
-            raise AuthenticationError(f"Failed to initialize API service: {e}")
+        return self.user_email
 
     def _get_user_email(self, creds: Credentials) -> str:
         """
@@ -269,14 +258,16 @@ class GooglePhotosClient:
             }
         }
 
-        # Paginate through results
+        # Paginate through results using direct REST API
         page_token = None
+        api_url = 'https://photoslibrary.googleapis.com/v1/mediaItems:search'
+
         while True:
             try:
                 # Rate limiting
                 self._wait_for_rate_limit()
 
-                # API request
+                # Prepare request body
                 request_body = {
                     'pageSize': min(page_size, 100),
                     'filters': search_filter
@@ -284,34 +275,49 @@ class GooglePhotosClient:
                 if page_token:
                     request_body['pageToken'] = page_token
 
-                response = self.service.mediaItems().search(
-                    body=request_body
-                ).execute()
+                # Get access token
+                if self.credentials.expired and self.credentials.refresh_token:
+                    self.credentials.refresh(Request())
+
+                # Make direct REST API call
+                headers = {
+                    'Authorization': f'Bearer {self.credentials.token}',
+                    'Content-Type': 'application/json'
+                }
+
+                response = requests.post(
+                    api_url,
+                    headers=headers,
+                    json=request_body,
+                    timeout=30
+                )
 
                 self.request_count += 1
 
-                # Yield photos
-                media_items = response.get('mediaItems', [])
-                for item in media_items:
-                    yield item
-
-                # Check for next page
-                page_token = response.get('nextPageToken')
-                if not page_token:
-                    break
-
-            except HttpError as e:
-                if e.resp.status == 429:
-                    # Rate limit exceeded
-                    retry_after = int(e.resp.get('Retry-After', 60))
+                # Handle HTTP errors
+                if response.status_code == 429:
+                    retry_after = int(response.headers.get('Retry-After', 60))
                     raise RateLimitError(
                         "Google Photos API rate limit exceeded",
                         retry_after=retry_after
                     )
-                elif e.resp.status in [401, 403]:
-                    raise AuthenticationError(f"Authentication failed: {e}")
-                else:
-                    raise NetworkError(f"API request failed: {e}")
+                elif response.status_code in [401, 403]:
+                    raise AuthenticationError(f"Authentication failed: {response.text}")
+                elif response.status_code != 200:
+                    raise NetworkError(f"API request failed: {response.status_code} - {response.text}")
+
+                # Parse response
+                data = response.json()
+
+                # Yield photos
+                media_items = data.get('mediaItems', [])
+                for item in media_items:
+                    yield item
+
+                # Check for next page
+                page_token = data.get('nextPageToken')
+                if not page_token:
+                    break
 
             except requests.exceptions.RequestException as e:
                 raise NetworkError(f"Network error: {e}")
