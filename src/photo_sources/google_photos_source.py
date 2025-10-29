@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Iterator, Dict, Any, Optional
 from datetime import datetime
 
-from .base import PhotoSource
+from .base import PhotoSource, PhotoMetadata
 from .google_photos_client import GooglePhotosClient
 from .token_manager import TokenManager
 from .exceptions import AuthenticationError
@@ -76,6 +76,9 @@ class GooglePhotosSource(PhotoSource):
 
         # Track downloaded files for cleanup
         self.downloaded_files: list[Path] = []
+
+        # Track photo metadata by ID (for two-phase curation)
+        self._photo_metadata_cache: Dict[str, Dict[str, Any]] = {}
 
     def authenticate(self, user_email: Optional[str] = None) -> str:
         """
@@ -292,3 +295,132 @@ class GooglePhotosSource(PhotoSource):
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager cleanup."""
         self.cleanup()
+
+    def list_metadata(
+        self,
+        year: Optional[int] = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None
+    ) -> Iterator[PhotoMetadata]:
+        """
+        List photo metadata without downloading (two-phase curation).
+
+        This is the efficient method that:
+        1. Fetches metadata from Google Photos API
+        2. No downloads - just metadata
+        3. Enables pre-filtering before expensive downloads
+
+        Args:
+            year: Filter to specific year
+            start_date: Filter photos after this date
+            end_date: Filter photos before this date
+
+        Yields:
+            PhotoMetadata: Lightweight metadata for each photo
+
+        Raises:
+            AuthenticationError: If not authenticated
+            ValueError: If no date filter provided
+        """
+        # Ensure authenticated
+        if not self.client.is_authenticated():
+            raise AuthenticationError(
+                "Not authenticated. Call authenticate() first."
+            )
+
+        # Determine date range
+        if year:
+            start_date = datetime(year, 1, 1)
+            end_date = datetime(year, 12, 31, 23, 59, 59)
+        elif not (start_date and end_date):
+            raise ValueError(
+                "Must provide either 'year' or both 'start_date' and 'end_date'"
+            )
+
+        # Fetch metadata from Google Photos (no downloads)
+        for photo_metadata in self.client.list_photos(start_date, end_date):
+            photo_id = photo_metadata['id']
+
+            # Cache metadata for later download
+            self._photo_metadata_cache[photo_id] = photo_metadata
+
+            # Extract metadata fields
+            media_metadata = photo_metadata.get('mediaMetadata', {})
+            creation_time = media_metadata.get('creationTime')
+
+            # Parse timestamp
+            timestamp = None
+            month = None
+            if creation_time:
+                timestamp = datetime.fromisoformat(
+                    creation_time.replace('Z', '+00:00')
+                )
+                month = timestamp.month
+
+            # Get dimensions
+            width = int(media_metadata.get('width', 0)) or None
+            height = int(media_metadata.get('height', 0)) or None
+
+            # Get file size (estimate from dimensions if not available)
+            # Google Photos API doesn't always provide file size
+            # Estimate: assume 3 bytes per pixel for compressed JPEG
+            if width and height:
+                estimated_size = width * height * 3
+            else:
+                estimated_size = 1_000_000  # 1MB default
+
+            # Get mime type
+            mime_type = photo_metadata.get('mimeType', 'image/jpeg')
+
+            # Get source URL
+            source_url = photo_metadata.get('productUrl')
+
+            # Create PhotoMetadata
+            metadata = PhotoMetadata(
+                id=photo_id,
+                timestamp=timestamp,
+                month=month,
+                width=width,
+                height=height,
+                file_size=estimated_size,
+                mime_type=mime_type,
+                source_url=source_url
+            )
+
+            yield metadata
+
+    def download_photo(self, photo_id: str, destination: str) -> None:
+        """
+        Download a specific photo by ID (two-phase curation).
+
+        This is used after pre-filtering to download only selected candidates.
+
+        Args:
+            photo_id: Photo ID from PhotoMetadata.id
+            destination: Local path to save photo
+
+        Raises:
+            ValueError: If photo_id not found
+            IOError: If download fails
+        """
+        # Get cached metadata
+        photo_metadata = self._photo_metadata_cache.get(photo_id)
+        if not photo_metadata:
+            raise ValueError(f"Photo ID not found: {photo_id}")
+
+        base_url = photo_metadata.get('baseUrl')
+        if not base_url:
+            raise ValueError(f"No download URL for photo: {photo_id}")
+
+        # Download photo
+        try:
+            download_url = self.client.get_download_url(photo_id, base_url)
+            self.client.download_photo(download_url, destination)
+
+            # Track downloaded file
+            dest_path = Path(destination)
+            self.downloaded_files.append(dest_path)
+            self.photo_map[destination] = photo_metadata
+
+        except Exception as e:
+            raise IOError(f"Failed to download photo {photo_id}: {e}") from e

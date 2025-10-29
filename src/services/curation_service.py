@@ -134,7 +134,8 @@ class CurationService:
         curator = TwelveCurator(config)
 
         try:
-            selection = curator.curate_from_source(
+            # Use v2 method for efficient two-phase curation
+            selection = curator.curate_from_source_v2(
                 source,
                 year=year,
                 strategy=strategy,

@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
 import numpy as np
+import tempfile
 
 from .data_classes import PhotoCandidate, TwelveSelection, CurationConfig
 from .exif_utils import extract_datetime, get_month
@@ -56,6 +57,9 @@ class TwelveCurator:
         self.config = config or CurationConfig.balanced()
         self.quality_analyzer = PhotoQualityAnalyzer()
         self.emotional_analyzer = EmotionalAnalyzer()
+
+        # Temporary directory for two-phase curation downloads
+        self._temp_download_dir = None
 
     def curate_year(
         self,
@@ -196,6 +200,117 @@ class TwelveCurator:
             # Always cleanup source (temp files, etc.)
             photo_source.cleanup()
 
+    def curate_from_source_v2(
+        self,
+        photo_source,  # PhotoSource interface with list_metadata() support
+        year: int,
+        strategy: Optional[str] = None,
+        progress_callback = None,
+        prefilter_target: int = 50
+    ) -> TwelveSelection:
+        """
+        Two-phase curation from PhotoSource (efficient for cloud sources).
+
+        This is the new efficient method that:
+        1. Lists metadata for ALL photos (no downloads)
+        2. Pre-filters to ~50 candidates using metadata
+        3. Downloads ONLY candidates
+        4. Performs deep analysis on candidates
+        5. Selects final 12 photos
+
+        Dramatically reduces downloads (e.g., 1000 photos → 50 downloads → 12 selected)
+
+        Args:
+            photo_source: PhotoSource with list_metadata() support
+            year: Year being curated
+            strategy: Optional strategy override
+            progress_callback: Optional callback(current, total, status_msg)
+            prefilter_target: How many candidates to download (default 50)
+
+        Returns:
+            TwelveSelection with exactly 12 photos (or fewer if <12 available)
+
+        Examples:
+            >>> from photo_sources import GooglePhotosSource
+            >>> source = GooglePhotosSource('creds.json')
+            >>> source.authenticate()
+            >>> curator = TwelveCurator()
+            >>> selection = curator.curate_from_source_v2(source, year=2024)
+            >>> print(f"Selected {len(selection.photos)} photos")
+
+        Note: Automatically cleans up downloaded candidates after curation
+        """
+        # Apply strategy override if provided
+        if strategy:
+            self.config.strategy = strategy
+
+        # Create temp directory for candidate downloads
+        self._temp_download_dir = tempfile.TemporaryDirectory(
+            prefix='twelve_curator_'
+        )
+        temp_dir = Path(self._temp_download_dir.name)
+
+        try:
+            # Phase 1: Pre-filter from metadata (no downloads)
+            if progress_callback:
+                progress_callback(0, None, "Fetching photo metadata...")
+
+            candidate_metadata = self._prefilter_from_metadata(
+                photo_source,
+                year,
+                prefilter_target,
+                progress_callback
+            )
+
+            if not candidate_metadata:
+                return self._create_empty_selection(year, 0)
+
+            # Phase 2: Download and analyze candidates
+            if progress_callback:
+                progress_callback(0, len(candidate_metadata), "Downloading candidates...")
+
+            candidates = self._analyze_downloaded_candidates(
+                photo_source,
+                candidate_metadata,
+                temp_dir,
+                year,
+                progress_callback
+            )
+
+            if not candidates:
+                return self._create_empty_selection(year, len(candidate_metadata))
+
+            if len(candidates) <= 12:
+                return self._create_selection(year, candidates, candidates)
+
+            # Phase 3: Temporal distribution
+            temporal_selections = self._apply_temporal_distribution(candidates)
+
+            # Phase 4: Visual diversity
+            if self.config.enable_diversity_filter:
+                final_selections = self._apply_visual_diversity(temporal_selections)
+            else:
+                final_selections = temporal_selections[:12]
+
+            # Phase 5: Ensure exactly 12 (fill if needed)
+            if len(final_selections) < 12:
+                final_selections = self._fill_to_twelve(final_selections, candidates)
+
+            # Phase 6: Create final selection
+            return self._create_selection(year, final_selections[:12], candidates)
+
+        finally:
+            # Cleanup temp download directory
+            if self._temp_download_dir:
+                try:
+                    self._temp_download_dir.cleanup()
+                except Exception as e:
+                    print(f"Warning: Failed to cleanup temp directory: {e}")
+                self._temp_download_dir = None
+
+            # Cleanup source
+            photo_source.cleanup()
+
     def preview_candidates(
         self,
         photo_paths: List[Path],
@@ -260,6 +375,80 @@ class TwelveCurator:
         self.config.strategy = original_strategy
 
         return selection
+
+    def distribute_to_twelve_months(
+        self,
+        photos: List[PhotoCandidate],
+        flexible: bool = True
+    ) -> dict:
+        """
+        Distribute photos across 12 months with flexible assignment.
+
+        Phase 1: Place photos in their capture months (one per month)
+        Phase 2: If flexible=True, fill empty months with best remaining photos
+
+        Args:
+            photos: List of curated photos (up to 12 PhotoCandidates)
+            flexible: If True, fills empty months with nearby photos
+
+        Returns:
+            Dict mapping month name to photo dict or None
+            {
+                "January": {...photo...} or None,
+                "February": {...photo...},
+                ...
+            }
+
+        Examples:
+            >>> # With 8 photos from different months
+            >>> curator = TwelveCurator()
+            >>> distribution = curator.distribute_to_twelve_months(photos, flexible=True)
+            >>> len([m for m in distribution.values() if m]) >= 8
+            True
+
+            >>> # Non-flexible mode leaves gaps
+            >>> distribution = curator.distribute_to_twelve_months(photos, flexible=False)
+        """
+        from calendar import month_name
+
+        ALL_MONTHS = list(month_name)[1:]  # ['January', 'February', ...]
+        month_assignments = {month: None for month in ALL_MONTHS}
+
+        if not photos:
+            return month_assignments
+
+        # Phase 1: Place photos in their capture months
+        remaining_photos = []
+        for photo in photos:
+            # Handle both objects and dicts
+            month = photo.month if hasattr(photo, 'month') else photo.get('month')
+
+            if month and 1 <= month <= 12:
+                capture_month = month_name[month]
+
+                if month_assignments[capture_month] is None:
+                    month_assignments[capture_month] = photo
+                else:
+                    remaining_photos.append(photo)
+            else:
+                remaining_photos.append(photo)
+
+        # Phase 2: If flexible, fill empty months with remaining photos
+        if flexible and remaining_photos:
+            empty_months = [m for m in ALL_MONTHS if month_assignments[m] is None]
+
+            # Sort remaining by combined score (best first)
+            remaining_photos.sort(
+                key=lambda p: p.combined_score if hasattr(p, 'combined_score') else p.get('combined_score', 0),
+                reverse=True
+            )
+
+            # Distribute to empty months
+            for i, empty_month in enumerate(empty_months):
+                if i < len(remaining_photos):
+                    month_assignments[empty_month] = remaining_photos[i]
+
+        return month_assignments
 
     # ========================================================================
     # Phase 1: Scoring
@@ -436,6 +625,225 @@ class TwelveCurator:
             combined_score=combined_score,
             metadata=metadata
         )
+
+    # ========================================================================
+    # Two-Phase Curation Helpers
+    # ========================================================================
+
+    def _prefilter_from_metadata(
+        self,
+        photo_source,
+        year: int,
+        target_count: int,
+        progress_callback
+    ):
+        """
+        Pre-filter photos using metadata only (no downloads).
+
+        Strategy:
+        1. Collect all photo metadata
+        2. Score each photo using metadata_score()
+        3. Apply temporal diversity (select from different months)
+        4. Return top N candidates for download
+
+        Args:
+            photo_source: PhotoSource with list_metadata() support
+            year: Year to filter
+            target_count: How many candidates to select
+            progress_callback: Optional progress callback
+
+        Returns:
+            List of PhotoMetadata for top candidates
+        """
+        from src.photo_sources.base import PhotoMetadata
+
+        # Collect all metadata
+        all_metadata = []
+        count = 0
+
+        for metadata in photo_source.list_metadata(year=year):
+            all_metadata.append(metadata)
+            count += 1
+
+            if progress_callback and count % 100 == 0:
+                progress_callback(count, None, f"Fetched {count} photo metadata...")
+
+        if progress_callback:
+            progress_callback(count, count, f"Fetched {count} photo metadata")
+
+        if not all_metadata:
+            return []
+
+        # Score and select diverse months
+        candidates = self._select_diverse_months(all_metadata, target_count)
+
+        if progress_callback:
+            progress_callback(
+                len(candidates),
+                len(all_metadata),
+                f"Pre-filtered to {len(candidates)} candidates"
+            )
+
+        return candidates
+
+    def _select_diverse_months(
+        self,
+        metadata_list,
+        target_count: int
+    ):
+        """
+        Select candidates with temporal diversity from metadata.
+
+        Strategy:
+        1. Group by month
+        2. Sort within each month by metadata_score()
+        3. Round-robin selection from months
+        4. Return top N candidates
+
+        Args:
+            metadata_list: List of PhotoMetadata
+            target_count: How many to select
+
+        Returns:
+            List of PhotoMetadata (up to target_count)
+        """
+        from collections import defaultdict
+
+        # Group by month
+        by_month = defaultdict(list)
+        no_month = []
+
+        for metadata in metadata_list:
+            # Score metadata
+            score = metadata.metadata_score()
+
+            if metadata.month:
+                by_month[metadata.month].append((score, metadata))
+            else:
+                no_month.append((score, metadata))
+
+        # Sort within each month by score (highest first)
+        for month_list in by_month.values():
+            month_list.sort(reverse=True, key=lambda x: x[0])
+
+        no_month.sort(reverse=True, key=lambda x: x[0])
+
+        # Round-robin selection from months
+        selected = []
+        month_indices = {month: 0 for month in by_month.keys()}
+
+        # Keep selecting until we have enough
+        while len(selected) < target_count:
+            added_this_round = False
+
+            # Try to add one from each month
+            for month in sorted(by_month.keys()):
+                if len(selected) >= target_count:
+                    break
+
+                idx = month_indices[month]
+                if idx < len(by_month[month]):
+                    _, metadata = by_month[month][idx]
+                    selected.append(metadata)
+                    month_indices[month] += 1
+                    added_this_round = True
+
+            # If no months left, add from no_month
+            if not added_this_round:
+                remaining = target_count - len(selected)
+                selected.extend([m for _, m in no_month[:remaining]])
+                break
+
+        return selected[:target_count]
+
+    def _analyze_downloaded_candidates(
+        self,
+        photo_source,
+        candidate_metadata,
+        temp_dir: Path,
+        year: int,
+        progress_callback
+    ):
+        """
+        Download candidates and perform deep analysis.
+
+        Args:
+            photo_source: PhotoSource instance
+            candidate_metadata: List of PhotoMetadata to download
+            temp_dir: Temporary directory for downloads
+            year: Year filter
+            progress_callback: Optional progress callback
+
+        Returns:
+            List of PhotoCandidate with full analysis
+        """
+        candidates = []
+
+        for idx, metadata in enumerate(candidate_metadata):
+            if progress_callback:
+                progress_callback(
+                    idx + 1,
+                    len(candidate_metadata),
+                    f"Analyzing candidate {idx + 1}/{len(candidate_metadata)}..."
+                )
+
+            try:
+                # Download photo
+                filename = f"{metadata.id}.jpg"
+                download_path = temp_dir / filename
+
+                photo_source.download_photo(metadata.id, str(download_path))
+
+                # Analyze quality
+                quality_result = self.quality_analyzer.analyze_photo(str(download_path))
+                quality_score = quality_result.composite
+
+                # Analyze emotional significance
+                emotional_result = self.emotional_analyzer.analyze_photo(str(download_path))
+                emotional_score = emotional_result.composite
+
+                # Calculate combined score
+                combined_score = (
+                    quality_score * self.config.quality_weight +
+                    emotional_score * self.config.emotional_weight
+                )
+
+                # Filter by minimum score
+                if combined_score < self.config.min_combined_score:
+                    continue
+
+                # Create metadata dict
+                candidate_metadata_dict = {
+                    'quality_tier': quality_result.tier,
+                    'emotional_tier': emotional_result.tier,
+                    'has_faces': emotional_result.face_count > 0,
+                    'face_count': emotional_result.face_count,
+                    'has_positive_emotion': emotional_result.has_positive_emotion,
+                    'original_url': metadata.source_url,
+                    'source_metadata': {
+                        'width': metadata.width,
+                        'height': metadata.height,
+                        'file_size': metadata.file_size,
+                        'mime_type': metadata.mime_type
+                    }
+                }
+
+                candidate = PhotoCandidate(
+                    photo_path=download_path,
+                    timestamp=metadata.timestamp,
+                    month=metadata.month,
+                    quality_score=quality_score,
+                    emotional_score=emotional_score,
+                    combined_score=combined_score,
+                    metadata=candidate_metadata_dict
+                )
+                candidates.append(candidate)
+
+            except Exception as e:
+                print(f"Warning: Failed to analyze candidate {metadata.id}: {e}")
+                continue
+
+        return candidates
 
     # ========================================================================
     # Phase 2: Temporal Distribution
