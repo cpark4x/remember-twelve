@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 google_photos_credentials.json
 token.json
+
+# Codespace-generated directories
+.claude/
+app.log

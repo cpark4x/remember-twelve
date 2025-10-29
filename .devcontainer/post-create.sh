@@ -54,6 +54,18 @@ else
     echo "  ✓ Amplifier symlink already exists"
 fi
 
+# Create .claude directory and symlink commands/agents
+echo "  Setting up Claude Code integration..."
+mkdir -p .claude
+if [ ! -L ".claude/commands" ]; then
+    ln -s ../amplifier/.claude/commands .claude/commands
+    echo "  ✓ Commands symlinked"
+fi
+if [ ! -L ".claude/agents" ]; then
+    ln -s ../amplifier/.claude/agents .claude/agents
+    echo "  ✓ Agents symlinked"
+fi
+
 echo "✓ Amplifier setup complete"
 echo
 
