@@ -401,6 +401,148 @@
             animation: rotate 1s linear infinite;
         }
 
+        /* ============================================
+           YEAR SELECTOR STYLES
+           ============================================ */
+        .year-selector {
+            display: flex;
+            align-items: center;
+            gap: var(--space-medium);
+            margin-top: var(--space-medium);
+        }
+
+        .year-nav-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--accent-sage);
+            border-radius: var(--radius-small);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-standard);
+            color: var(--accent-sage-deep);
+        }
+
+        .year-nav-btn:hover:not(:disabled) {
+            background: var(--accent-sage);
+            color: white;
+        }
+
+        .year-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .year-dropdown {
+            position: relative;
+        }
+
+        .year-current {
+            background: var(--surface-elevated);
+            border: 2px solid var(--accent-sage-deep);
+            border-radius: var(--radius-medium);
+            padding: 12px 20px;
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--space-small);
+            cursor: pointer;
+            transition: all var(--transition-standard);
+            color: var(--accent-sage-deep);
+        }
+
+        .year-current:hover {
+            background: var(--surface-secondary);
+        }
+
+        .year-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: var(--space-small);
+            background: var(--surface-elevated);
+            border: 1px solid var(--accent-sage);
+            border-radius: var(--radius-medium);
+            box-shadow: var(--shadow-medium);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .year-dropdown-menu.show {
+            display: block;
+        }
+
+        .year-option {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background var(--transition-fast);
+        }
+
+        .year-option:hover {
+            background: var(--surface-tertiary);
+        }
+
+        .year-option.active {
+            background: var(--accent-sage);
+            color: white;
+            font-weight: 600;
+        }
+
+        .year-count {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .loading-state, .empty-state, .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-xlarge);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--surface-tertiary);
+            border-top-color: var(--accent-sage);
+            border-radius: 50%;
+            animation: rotate 1s linear infinite;
+            margin-bottom: var(--space-medium);
+        }
+
+        .empty-state .material-icons, .error-state .material-icons {
+            margin-bottom: var(--space-medium);
+        }
+
+        .sync-btn, .retry-btn {
+            background: var(--accent-sage);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-medium);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-standard);
+            margin-top: var(--space-medium);
+        }
+
+        .sync-btn:hover, .retry-btn:hover {
+            background: var(--accent-sage-deep);
+        }
+
         @media (max-width: 768px) {
             .photo-grid {
                 grid-template-columns: 1fr;
@@ -409,6 +551,10 @@
 
             .year-title {
                 font-size: 36px;
+            }
+
+            .year-selector {
+                justify-content: center;
             }
         }
 
@@ -561,6 +707,28 @@
             <h1 class="year-title" id="year">Loading...</h1>
             <p class="subtitle" id="subtitle">Loading your curated moments...</p>
 
+            <!-- Year Selector -->
+            <div class="year-selector">
+                <button class="year-nav-btn" id="prevYearBtn" onclick="navigateYear(-1)">
+                    <span class="material-icons">chevron_left</span>
+                </button>
+
+                <div class="year-dropdown">
+                    <button class="year-current" id="currentYearBtn" onclick="toggleYearDropdown()">
+                        <span id="currentYearText">2023</span>
+                        <span class="material-icons">expand_more</span>
+                    </button>
+
+                    <div class="year-dropdown-menu" id="yearDropdownMenu">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <button class="year-nav-btn" id="nextYearBtn" onclick="navigateYear(1)">
+                    <span class="material-icons">chevron_right</span>
+                </button>
+            </div>
+
             <div class="stats-row" id="stats">
                 <!-- Stats will be loaded dynamically -->
             </div>
@@ -627,179 +795,90 @@
 </div>
 
 <script>
-// Load the curation data and render the gallery
-async function loadGallery() {
-    try {
-        const response = await fetch('twelve_2023_balanced.json');
-        const data = await response.json();
-        renderGallery(data);
-    } catch (error) {
-        console.error('Error loading gallery:', error);
-        document.getElementById('subtitle').textContent = 'Error loading gallery data';
-    }
-}
-
-function createMonthSlots() {
-    const months = [
-        'January', 'February', 'March', 'April',
-        'May', 'June', 'July', 'August',
-        'September', 'October', 'November', 'December'
-    ];
-
-    return months.map((name, index) => ({
-        monthIndex: index,
-        monthName: name,
-        photo: null
-    }));
-}
-
-function selectBestPhoto(photos) {
-    if (photos.length === 1) return photos[0];
-
-    return photos.sort((a, b) => {
-        if (b.emotional_score !== a.emotional_score) {
-            return b.emotional_score - a.emotional_score;
-        }
-        return b.combined_score - a.combined_score;
-    })[0];
-}
-
-function distributePhotos(photos, monthSlots) {
-    const photosByMonth = new Map();
-    photos.forEach(photo => {
-        const monthIndex = photo.month - 1;
-        if (!photosByMonth.has(monthIndex)) {
-            photosByMonth.set(monthIndex, []);
-        }
-        photosByMonth.get(monthIndex).push(photo);
-    });
-
-    photosByMonth.forEach((photosInMonth, monthIndex) => {
-        monthSlots[monthIndex].photo = selectBestPhoto(photosInMonth);
-    });
-
-    return monthSlots;
-}
-
 function renderGallery(data) {
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
+    if (!data || !data.photos || data.photos.length !== 12) {
+        console.error('Invalid gallery data:', data);
+        showErrorState(new Error('Invalid data structure'));
+        return;
+    }
+
+    const sortedPhotos = [...data.photos].sort((a, b) => a.month_slot - b.month_slot);
     const monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    const monthSlots = createMonthSlots();
-
-    // Use month_distribution from curator if available (flexible distribution)
-    if (data.month_distribution) {
-        monthSlots.forEach(slot => {
-            slot.photo = data.month_distribution[slot.monthName];
-        });
-    } else {
-        // Fallback to old distribution logic
-        distributePhotos(data.photos, monthSlots);
-    }
-
-    const filledMonths = monthSlots.filter(slot => slot.photo !== null).length;
-
     document.getElementById('year').textContent = data.year;
-    document.getElementById('subtitle').textContent =
-        `Your year in ${filledMonths === 12 ? 'twelve' : filledMonths} unforgettable moments`;
+    document.getElementById('subtitle').textContent = 'Your year in twelve unforgettable moments';
 
-    const stats = data.stats;
+    const avgScore = sortedPhotos.reduce((sum, p) => sum + p.combined_score, 0) / sortedPhotos.length;
     document.getElementById('stats').innerHTML = `
         <div class="stat-chip">
             <i class="material-icons">photo_camera</i>
-            ${data.photos.length} photos from ${filledMonths} months
+            ${sortedPhotos.length} photos from 12 months
         </div>
-        ${stats.avg_combined ? `<div class="stat-chip">
+        <div class="stat-chip">
             <i class="material-icons">star</i>
-            Avg score: ${stats.avg_combined.toFixed(1)}/100
-        </div>` : ''}
-        ${stats.photos_with_faces !== undefined ? `<div class="stat-chip">
-            <i class="material-icons">face</i>
-            ${stats.photos_with_faces} with faces
-        </div>` : ''}
+            Avg score: ${avgScore.toFixed(1)}/100
+        </div>
     `;
 
-    const activeMonths = new Set(monthSlots.filter(s => s.photo).map(s => s.monthIndex + 1));
     const timelineHTML = monthShort.map((month, i) => {
-        const isActive = activeMonths.has(i + 1);
-        return `<div class="month-pill ${isActive ? 'active' : ''}">${month}</div>`;
+        return `<div class="month-pill active">${month}</div>`;
     }).join('');
     document.getElementById('timeline').innerHTML = timelineHTML;
 
-    const photoGridHTML = monthSlots.map((slot, monthIndex) => {
-        if (slot.photo) {
-            const photo = slot.photo;
-            // Find photo index by matching photo_path
-            const photoIndex = data.photos.findIndex(p => p.photo_path === photo.photo_path);
-            const date = new Date(photo.timestamp);
-            // Use the calendar month slot, not the photo's capture month
-            const monthName = slot.monthName.toUpperCase();
-            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const filename = photo.photo_path.split('/').pop();
+    const gallery = document.querySelector('.photo-grid');
+    gallery.innerHTML = sortedPhotos.map(photo => {
+        const monthName = monthNames[photo.month_slot - 1];
+        const photoUrl = `/photos/${data.year}/${photo.filename}`;
+        const date = new Date(photo.captured_at);
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-            // All photos are converted to JPG/JPEG for browser compatibility
-            let ext = filename.split('.').pop().toLowerCase();
-            if (ext === 'heic') {
-                ext = 'jpg';  // HEIC files are converted to JPG
-            } else if (ext === 'jpeg') {
-                ext = 'jpg';  // Normalize jpeg to jpg
-            }
-            const photoSrc = `photos/${photoIndex}.${ext}`;
+        const combinedClass = photo.combined_score >= 70 ? 'high' :
+                             photo.combined_score >= 50 ? 'medium' : 'low';
+        const qualityClass = photo.quality_score >= 70 ? 'high' :
+                            photo.quality_score >= 50 ? 'medium' : 'low';
+        const emotionalClass = photo.emotional_score >= 70 ? 'high' :
+                              photo.emotional_score >= 50 ? 'medium' : 'low';
 
-            const combinedClass = photo.combined_score >= 70 ? 'high' :
-                                 photo.combined_score >= 50 ? 'medium' : 'low';
-            const qualityClass = photo.quality_score >= 70 ? 'high' :
-                                photo.quality_score >= 50 ? 'medium' : 'low';
-            const emotionalClass = photo.emotional_score >= 70 ? 'high' :
-                                  photo.emotional_score >= 50 ? 'medium' : 'low';
+        return `
+            <div class="photo-card" data-month-slot="${photo.month_slot}" data-photo-id="${photo.id}">
+                <div class="photo-wrapper">
+                    <img src="${photoUrl}"
+                         class="photo-img"
+                         alt="${monthName} - ${photo.filename}"
+                         loading="lazy"
+                         onerror="this.onerror=null; this.src='/api/photos/${photo.id}';">
 
-            return `
-                <div class="photo-card" data-month-slot="${slot.monthName}">
-                    <div class="photo-wrapper">
-                        <img src="${photoSrc}" class="photo-img" alt="${filename}" loading="lazy">
-                        <div class="swap-overlay">
-                            <button class="swap-btn" onclick="openSwapModal('${slot.monthName}')">
-                                Swap Photo
-                            </button>
-                        </div>
+                    <div class="swap-overlay">
+                        <button class="swap-btn" onclick="openSwapModal(${photo.month_slot}, '${monthName}')">
+                            Swap Photo
+                        </button>
                     </div>
-                    <div class="card-content">
-                        <div class="card-month">${monthName}</div>
-                        <div class="card-date">${dateStr}</div>
-                        <div class="card-filename">${filename}</div>
+                </div>
 
-                        <div class="score-row">
-                            <div class="score-badge ${combinedClass}">
-                                <div class="score-label">Combined</div>
-                                <div class="score-value">${Math.round(photo.combined_score)}</div>
-                            </div>
-                            <div class="score-badge ${qualityClass}">
-                                <div class="score-label">Quality</div>
-                                <div class="score-value">${Math.round(photo.quality_score)}</div>
-                            </div>
-                            <div class="score-badge ${emotionalClass}">
-                                <div class="score-label">Emotional</div>
-                                <div class="score-value">${Math.round(photo.emotional_score)}</div>
-                            </div>
+                <div class="card-content">
+                    <div class="card-month">${monthName.toUpperCase()}</div>
+                    <div class="card-date">${dateStr}</div>
+                    <div class="card-filename">${photo.filename}</div>
+
+                    <div class="score-row">
+                        <div class="score-badge ${combinedClass}">
+                            <div class="score-label">Combined</div>
+                            <div class="score-value">${Math.round(photo.combined_score)}</div>
+                        </div>
+                        <div class="score-badge ${qualityClass}">
+                            <div class="score-label">Quality</div>
+                            <div class="score-value">${Math.round(photo.quality_score)}</div>
+                        </div>
+                        <div class="score-badge ${emotionalClass}">
+                            <div class="score-label">Emotional</div>
+                            <div class="score-value">${Math.round(photo.emotional_score)}</div>
                         </div>
                     </div>
                 </div>
-            `;
-        } else {
-            return `
-                <div class="photo-card empty-month" data-month="${monthIndex}">
-                    <div class="empty-month-content">
-                        <div class="month-name">${slot.monthName}</div>
-                        <div class="empty-hint">—</div>
-                    </div>
-                </div>
-            `;
-        }
+            </div>
+        `;
     }).join('');
-
-    document.getElementById('photoGrid').innerHTML = photoGridHTML;
 }
 
 // Sync with Google Photos
@@ -815,13 +894,13 @@ document.getElementById('syncButton')?.addEventListener('click', async () => {
         const response = await fetch('/sync', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({year: 2023})
+            body: JSON.stringify({year: currentYear})
         });
 
         if (response.ok) {
             status.textContent = 'Sync complete! Reloading...';
-            setTimeout(() => {
-                loadGallery();
+            setTimeout(async () => {
+                await loadGalleryForYear(currentYear);
                 status.textContent = '';
             }, 1000);
         } else {
@@ -840,222 +919,161 @@ document.getElementById('syncButton')?.addEventListener('click', async () => {
 // PHOTO SWAP FUNCTIONALITY
 // ============================================
 
-let galleryData = null; // Store the loaded gallery data
-let currentSwapMonth = null; // Track which month is being swapped
+async function openSwapModal(monthSlot, monthName) {
+    currentSwapMonthSlot = monthSlot;
+    currentSwapMonthName = monthName;
 
-// Update loadGallery to store data globally
-const originalLoadGallery = loadGallery;
-async function loadGallery() {
-    try {
-        const response = await fetch('twelve_2023_balanced.json');
-        galleryData = await response.json();
-        renderGallery(galleryData);
-    } catch (error) {
-        console.error('Error loading gallery:', error);
-        document.getElementById('subtitle').textContent = 'Error loading gallery data';
-    }
+    const modal = document.getElementById('swapModal');
+    const modalTitle = document.getElementById('modalTitle');
+
+    modalTitle.textContent = `Swap Photo for ${monthName} ${currentYear}`;
+    modal.classList.add('active');
+
+    await loadAlternatives(monthSlot);
+    await loadAllPhotos();
 }
 
-// Open swap modal
-function openSwapModal(monthName) {
-    currentSwapMonth = monthName;
-    document.getElementById('modalTitle').textContent = `Swap Photo for ${monthName}`;
-    document.getElementById('swapModal').classList.add('active');
-
-    // Load alternatives for auto-pick tab
-    loadAutoPickAlternatives(monthName);
-
-    // Pre-load browse all photos immediately
-    loadBrowseAllPhotos();
-}
-
-// Close swap modal
 function closeSwapModal() {
     document.getElementById('swapModal').classList.remove('active');
-    currentSwapMonth = null;
+    currentSwapMonthSlot = null;
+    currentSwapMonthName = null;
 }
 
-// Switch between tabs
 function switchTab(tabName) {
-    // Update tab buttons
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
 
-    // Update tab content
     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
     if (tabName === 'auto') {
         document.getElementById('autoTab').classList.add('active');
     } else {
         document.getElementById('browseTab').classList.add('active');
-        // Lazy load browse all content
-        const browseGrid = document.getElementById('browseAllGrid');
-        if (!browseGrid.innerHTML || browseGrid.innerHTML.trim() === '') {
-            loadBrowseAllPhotos();
-        }
     }
 }
 
-// Load auto-pick alternatives (best photos from same capture month)
-function loadAutoPickAlternatives(monthName) {
-    const grid = document.getElementById('autoPickGrid');
+async function loadAlternatives(monthSlot) {
+    try {
+        const response = await fetch(`/api/year/${currentYear}/alternatives/${monthSlot}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    if (!galleryData || !galleryData.photos_by_capture_month) {
-        grid.innerHTML = '<p>No alternatives available</p>';
-        return;
-    }
+        const data = await response.json();
+        const grid = document.getElementById('autoPickGrid');
 
-    // Get currently selected photo for this calendar slot
-    const currentPhoto = galleryData.month_distribution[monthName];
+        if (!data.alternatives || data.alternatives.length === 0) {
+            grid.innerHTML = `
+                <p class="no-alternatives" style="color: var(--text-secondary);">
+                    No other photos from ${monthNames[monthSlot - 1]}<br>
+                    Try "Browse All" to see all ${currentYear} photos.
+                </p>
+            `;
+            return;
+        }
 
-    if (!currentPhoto) {
-        grid.innerHTML = '<p style="color: var(--text-secondary);">No photo selected for this month yet.</p>';
-        return;
-    }
+        const topAlternatives = data.alternatives
+            .sort((a, b) => b.combined_score - a.combined_score)
+            .slice(0, 10);
 
-    // Get the capture month of the current photo
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-    const captureMonthName = monthNames[currentPhoto.month - 1];
-
-    // Get all photos from the same capture month
-    const alternatives = galleryData.photos_by_capture_month[captureMonthName] || [];
-
-    // Filter out the currently selected photo and take top 5
-    const topAlternatives = alternatives
-        .filter(p => p.photo_path !== currentPhoto.photo_path)
-        .slice(0, 5);
-
-    if (topAlternatives.length === 0) {
-        grid.innerHTML = '<p style="color: var(--text-secondary);">No alternative photos available for this month. Try "Browse All" to pick from any month.</p>';
-        return;
-    }
-
-    grid.innerHTML = topAlternatives.map(photo => {
-        const photoIndex = galleryData.photos.findIndex(p => p.photo_path === photo.photo_path);
-        const filename = photo.photo_path.split('/').pop();
-        let ext = filename.split('.').pop().toLowerCase();
-        if (ext === 'heic' || ext === 'jpeg') ext = 'jpg';
-        const photoSrc = `photos/${photoIndex}.${ext}`;
-
-        return `
-            <div class="alt-photo-card" onclick="swapPhoto('${monthName}', '${photo.photo_path}')">
-                <img src="${photoSrc}" class="alt-photo-img" alt="${filename}">
-                <div class="alt-photo-info">
-                    Score: ${Math.round(photo.combined_score)}
+        grid.innerHTML = topAlternatives.map(photo => {
+            const photoUrl = `/photos/${currentYear}/${photo.filename}`;
+            return `
+                <div class="alt-photo-card" onclick="swapPhoto(${photo.id})">
+                    <img src="${photoUrl}"
+                         class="alt-photo-img"
+                         alt="${photo.filename}"
+                         onerror="this.onerror=null; this.src='/api/photos/${photo.id}';">
+                    <div class="alt-photo-info">
+                        Score: ${Math.round(photo.combined_score)}
+                    </div>
                 </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error('Failed to load alternatives:', error);
+        document.getElementById('autoPickGrid').innerHTML = `
+            <p class="error" style="color: var(--text-secondary);">Failed to load alternatives</p>
+        `;
+    }
+}
+
+async function loadAllPhotos() {
+    try {
+        const response = await fetch(`/api/year/${currentYear}/photos`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const photos = await response.json();
+        const grid = document.getElementById('browseAllGrid');
+
+        if (!photos || photos.length === 0) {
+            grid.innerHTML = '<p style="color: var(--text-secondary);">No photos available</p>';
+            return;
+        }
+
+        const sortedPhotos = [...photos].sort((a, b) => b.combined_score - a.combined_score);
+
+        grid.innerHTML = `
+            <div class="alternatives-grid">
+                ${sortedPhotos.map(photo => {
+                    const photoUrl = `/photos/${currentYear}/${photo.filename}`;
+                    return `
+                        <div class="alt-photo-card" onclick="swapPhoto(${photo.id})">
+                            <img src="${photoUrl}"
+                                 class="alt-photo-img"
+                                 alt="${photo.filename}"
+                                 onerror="this.onerror=null; this.src='/api/photos/${photo.id}';">
+                            <div class="alt-photo-info">
+                                Score: ${Math.round(photo.combined_score)}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
             </div>
         `;
-    }).join('');
+
+    } catch (error) {
+        console.error('Failed to load all photos:', error);
+        document.getElementById('browseAllGrid').innerHTML = `
+            <p class="error" style="color: var(--text-secondary);">Failed to load photos</p>
+        `;
+    }
 }
 
-// Load all photos - show ALL 35 photos so user can pick anything
-function loadBrowseAllPhotos() {
-    console.log('=== loadBrowseAllPhotos called ===');
-    const grid = document.getElementById('browseAllGrid');
-
-    if (!galleryData) {
-        console.error('No galleryData!');
-        grid.innerHTML = '<p>No gallery data loaded</p>';
+async function swapPhoto(newPhotoId) {
+    if (!currentSwapMonthSlot || !currentYear) {
+        console.error('Missing swap context');
         return;
     }
 
-    if (!galleryData.photos) {
-        console.error('No photos in galleryData!');
-        grid.innerHTML = '<p>No photos available</p>';
-        return;
-    }
-
-    console.log('Total photos available:', galleryData.photos.length);
-
-    // Show ALL photos sorted by quality score
-    const allPhotos = [...galleryData.photos].sort((a, b) => b.combined_score - a.combined_score);
-
-    const htmlContent = `
-        <div class="alternatives-grid">
-            ${allPhotos.map(photo => {
-                const photoIndex = galleryData.photos.findIndex(p => p.photo_path === photo.photo_path);
-                const filename = photo.photo_path.split('/').pop();
-                let ext = filename.split('.').pop().toLowerCase();
-                if (ext === 'heic' || ext === 'jpeg') ext = 'jpg';
-                const photoSrc = `photos/${photoIndex}.${ext}`;
-
-                return `
-                    <div class="alt-photo-card" onclick="swapPhoto('${currentSwapMonth}', '${photo.photo_path}')">
-                        <img src="${photoSrc}" class="alt-photo-img" alt="${filename}">
-                        <div class="alt-photo-info">
-                            Score: ${Math.round(photo.combined_score)}
-                        </div>
-                    </div>
-                `;
-            }).join('')}
-        </div>
-    `;
-
-    grid.innerHTML = htmlContent;
-    console.log('HTML set, grid innerHTML length:', grid.innerHTML.length);
-}
-
-// Swap the photo
-function swapPhoto(monthSlot, newPhotoPath) {
-    if (!galleryData) return;
-
-    // Find the new photo object
-    const newPhoto = galleryData.photos.find(p => p.photo_path === newPhotoPath);
-    if (!newPhoto) {
-        console.error('Photo not found:', newPhotoPath);
-        return;
-    }
-
-    // Update the month distribution
-    galleryData.month_distribution[monthSlot] = newPhoto;
-
-    // Track user swap
-    if (!galleryData.user_swaps) {
-        galleryData.user_swaps = {};
-    }
-    galleryData.user_swaps[monthSlot] = newPhotoPath;
-
-    // Save to localStorage for persistence
     try {
-        localStorage.setItem('twelve_user_swaps', JSON.stringify(galleryData.user_swaps));
-    } catch (e) {
-        console.error('Could not save swap preference:', e);
-    }
+        const response = await fetch('/api/swaps', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                year: currentYear,
+                month_slot: currentSwapMonthSlot,
+                new_photo_id: newPhotoId,
+                reason: 'User manual swap'
+            })
+        });
 
-    // Re-render the gallery
-    renderGallery(galleryData);
-
-    // Close the modal
-    closeSwapModal();
-
-    console.log(`Swapped ${monthSlot} to ${newPhotoPath}`);
-}
-
-// Load user swaps from localStorage on page load
-function loadUserSwaps() {
-    try {
-        const saved = localStorage.getItem('twelve_user_swaps');
-        if (saved && galleryData) {
-            const swaps = JSON.parse(saved);
-            galleryData.user_swaps = swaps;
-
-            // Apply saved swaps
-            Object.keys(swaps).forEach(monthSlot => {
-                const photoPath = swaps[monthSlot];
-                const photo = galleryData.photos.find(p => p.photo_path === photoPath);
-                if (photo) {
-                    galleryData.month_distribution[monthSlot] = photo;
-                }
-            });
-
-            // Re-render with user preferences
-            renderGallery(galleryData);
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Swap failed');
         }
-    } catch (e) {
-        console.error('Could not load swap preferences:', e);
+
+        const result = await response.json();
+        console.log('Swap successful:', result);
+
+        await loadGalleryForYear(currentYear);
+        closeSwapModal();
+
+    } catch (error) {
+        console.error('Failed to swap photo:', error);
+        alert(`Failed to swap photo: ${error.message}`);
     }
 }
+
 
 // Close modal when clicking outside
 document.getElementById('swapModal')?.addEventListener('click', (e) => {
@@ -1064,10 +1082,176 @@ document.getElementById('swapModal')?.addEventListener('click', (e) => {
     }
 });
 
-// Load gallery on page load
-loadGallery().then(() => {
-    // Load user swaps after gallery is loaded
-    loadUserSwaps();
+// ============================================
+// MULTI-YEAR NAVIGATION
+// ============================================
+
+let availableYears = [];
+let currentYear = new Date().getFullYear();
+let galleryData = null;
+let currentSwapMonthSlot = null;
+let currentSwapMonthName = null;
+
+const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                   'July', 'August', 'September', 'October', 'November', 'December'];
+
+async function loadAvailableYears() {
+    try {
+        const response = await fetch('/api/years');
+        const data = await response.json();
+        availableYears = data.sort((a, b) => b.year - a.year);  // Newest first
+
+        // Populate dropdown
+        populateYearDropdown();
+
+        // Set current year (default to newest with photos)
+        const latestYear = availableYears.find(y => y.photo_count > 0);
+        if (latestYear) {
+            currentYear = latestYear.year;
+            updateYearDisplay();
+        }
+
+    } catch (error) {
+        console.error('Failed to load years:', error);
+    }
+}
+
+function populateYearDropdown() {
+    const menu = document.getElementById('yearDropdownMenu');
+    menu.innerHTML = availableYears.map(yearData => {
+        const isActive = yearData.year === currentYear;
+        const photoText = yearData.photo_count > 0
+            ? `${yearData.photo_count} photos`
+            : 'No photos yet';
+
+        return `
+            <div class="year-option ${isActive ? 'active' : ''}"
+                 onclick="selectYear(${yearData.year})">
+                <span>${yearData.year}</span>
+                <span class="year-count">${photoText}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleYearDropdown() {
+    const menu = document.getElementById('yearDropdownMenu');
+    menu.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.querySelector('.year-dropdown');
+    if (dropdown && !dropdown.contains(event.target)) {
+        document.getElementById('yearDropdownMenu').classList.remove('show');
+    }
+});
+
+async function selectYear(year) {
+    currentYear = year;
+    updateYearDisplay();
+    toggleYearDropdown();
+
+    // Load photos for new year
+    await loadGalleryForYear(year);
+}
+
+function navigateYear(direction) {
+    const currentIndex = availableYears.findIndex(y => y.year === currentYear);
+    const newIndex = currentIndex - direction;  // Subtract because list is newest-first
+
+    if (newIndex >= 0 && newIndex < availableYears.length) {
+        selectYear(availableYears[newIndex].year);
+    }
+}
+
+function updateYearDisplay() {
+    document.getElementById('currentYearText').textContent = currentYear;
+
+    // Update nav buttons (disable if at edges)
+    const currentIndex = availableYears.findIndex(y => y.year === currentYear);
+    document.getElementById('prevYearBtn').disabled = currentIndex === availableYears.length - 1;
+    document.getElementById('nextYearBtn').disabled = currentIndex === 0;
+
+    // Update dropdown active state
+    populateYearDropdown();
+}
+
+async function loadGalleryForYear(year) {
+    try {
+        showLoadingState();
+
+        const response = await fetch(`/api/year/${year}/twelve`);
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                showEmptyState(year);
+                return;
+            }
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        // data = { year, strategy, curation_id, photos: [12 photos with month_slot] }
+
+        galleryData = data;
+        renderGallery(data);
+
+    } catch (error) {
+        console.error('Failed to load gallery:', error);
+        showErrorState(error);
+    }
+}
+
+function showLoadingState() {
+    const gallery = document.querySelector('.photo-grid');
+    gallery.innerHTML = `
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading your twelve moments...</p>
+        </div>
+    `;
+}
+
+function showEmptyState(year) {
+    const gallery = document.querySelector('.photo-grid');
+    gallery.innerHTML = `
+        <div class="empty-state">
+            <span class="material-icons" style="font-size: 64px; opacity: 0.3;">photo_library</span>
+            <h3>No photos for ${year} yet</h3>
+            <p>Connect Google Photos or add photos manually to get started.</p>
+            <button class="sync-btn" onclick="syncGooglePhotos()">
+                Connect Google Photos
+            </button>
+        </div>
+    `;
+}
+
+function showErrorState(error) {
+    const gallery = document.querySelector('.photo-grid');
+    gallery.innerHTML = `
+        <div class="error-state">
+            <span class="material-icons" style="font-size: 64px; color: #d32f2f;">error_outline</span>
+            <h3>Couldn't load photos</h3>
+            <p>${error.message}</p>
+            <button class="retry-btn" onclick="loadGalleryForYear(currentYear)">
+                Try Again
+            </button>
+        </div>
+    `;
+}
+
+function syncGooglePhotos() {
+    const button = document.getElementById('syncButton');
+    if (button) {
+        button.click();
+    }
+}
+
+// Load gallery on page load - now uses multi-year system
+window.addEventListener('DOMContentLoaded', async function() {
+    await loadAvailableYears();
+    await loadGalleryForYear(currentYear);
 });
 </script>
 
