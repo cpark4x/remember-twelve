@@ -54,7 +54,7 @@ else
     echo "  ✓ Amplifier symlink already exists"
 fi
 
-# Create .claude directory and symlink commands/agents
+# Create .claude directory and symlink commands/agents/tools/settings
 echo "  Setting up Claude Code integration..."
 mkdir -p .claude
 if [ ! -L ".claude/commands" ]; then
@@ -64,6 +64,14 @@ fi
 if [ ! -L ".claude/agents" ]; then
     ln -s ../amplifier/.claude/agents .claude/agents
     echo "  ✓ Agents symlinked"
+fi
+if [ ! -L ".claude/tools" ]; then
+    ln -s ../amplifier/.claude/tools .claude/tools
+    echo "  ✓ Tools symlinked"
+fi
+if [ ! -L ".claude/settings.json" ]; then
+    ln -s ../amplifier/.claude/settings.json .claude/settings.json
+    echo "  ✓ Settings symlinked"
 fi
 
 echo "✓ Amplifier setup complete"
