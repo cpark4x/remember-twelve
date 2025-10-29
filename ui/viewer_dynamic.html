@@ -5,59 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remember Twelve - Dynamic Gallery</title>
 
-    <!-- Material Design CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Typography - Inter (clean sans-serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Optional serif for warmth in headlines -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
     <style>
+        /* ============================================
+           MARU COFFEE AESTHETIC VARIABLES
+           ============================================ */
+        :root {
+            /* Colors - Warm Neutrals */
+            --surface-primary: #FAFAF8;
+            --surface-secondary: #F3F3F3;
+            --surface-tertiary: #EEEDE9;
+            --surface-elevated: #FFFFFF;
+
+            /* Accents - Muted Natural Tones */
+            --accent-sage: #7396A2;
+            --accent-sage-deep: #5487A0;
+
+            /* Text - Warm Charcoal */
+            --text-primary: #2A2825;
+            --text-secondary: #5A5551;
+            --text-tertiary: #8A857F;
+            --text-muted: #6B6864;
+
+            /* Shadows - 4-Layer System */
+            --shadow-soft:
+                0 0 0 1px rgba(42, 40, 37, 0.04),
+                0 1px 2px rgba(42, 40, 37, 0.06),
+                0 4px 8px rgba(42, 40, 37, 0.04);
+
+            --shadow-medium:
+                0 0 0 1px rgba(42, 40, 37, 0.04),
+                0 2px 4px rgba(42, 40, 37, 0.08),
+                0 8px 16px rgba(42, 40, 37, 0.08);
+
+            /* Corner Radius */
+            --radius-small: 6px;
+            --radius-medium: 8px;
+            --radius-large: 12px;
+            --radius-pill: 20px;
+
+            /* Spacing */
+            --space-small: 8px;
+            --space-medium: 16px;
+            --space-large: 24px;
+            --space-xlarge: 40px;
+
+            /* Motion */
+            --transition-standard: 350ms cubic-bezier(0.4, 0.0, 0.2, 1);
+
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Merriweather', Georgia, serif;
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-sans);
+            background: var(--surface-primary);
             min-height: 100vh;
             margin: 0;
             padding: 0;
         }
 
         .header {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 24px 0;
-            margin-bottom: 32px;
+            background: var(--surface-elevated);
+            box-shadow: var(--shadow-soft);
+            padding: var(--space-large) 0;
+            margin-bottom: var(--space-xlarge);
         }
 
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 var(--space-large);
         }
 
         .year-title {
+            font-family: var(--font-serif);
             font-size: 48px;
             font-weight: 300;
             margin: 0;
-            color: #667eea;
+            color: var(--accent-sage);
+            line-height: 1.1;
         }
 
         .subtitle {
             font-size: 18px;
-            color: #666;
+            color: var(--text-secondary);
             margin: 8px 0 0 0;
+            line-height: 1.5;
         }
 
         .stats-row {
-            margin-top: 16px;
+            margin-top: var(--space-medium);
             display: flex;
-            gap: 24px;
+            gap: var(--space-large);
             flex-wrap: wrap;
         }
 
         .stat-chip {
-            background: #f5f5f5;
-            padding: 8px 16px;
-            border-radius: 16px;
+            background: var(--surface-secondary);
+            padding: 8px var(--space-medium);
+            border-radius: var(--radius-medium);
             font-size: 14px;
-            color: #555;
+            color: var(--text-primary);
         }
 
         .stat-chip .material-icons {
@@ -69,60 +124,100 @@
         .container-custom {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px 48px 24px;
+            padding: 0 var(--space-large) 48px var(--space-large);
         }
 
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
+            gap: var(--space-large);
             margin-top: 32px;
         }
 
         .photo-card {
-            background: white;
-            border-radius: 16px;
+            background: var(--surface-elevated);
+            border-radius: var(--radius-medium);
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition-standard);
             cursor: pointer;
+            position: relative;
         }
 
         .photo-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .photo-card:hover .swap-overlay {
+            opacity: 1;
+        }
+
+        /* Swap button overlay */
+        .swap-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(42, 40, 37, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity var(--transition-standard);
+            z-index: 10;
+        }
+
+        .swap-btn {
+            background: var(--surface-elevated);
+            color: var(--accent-sage-deep);
+            border: 2px solid var(--accent-sage);
+            padding: 12px 24px;
+            border-radius: var(--radius-small);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .swap-btn:hover {
+            background: var(--accent-sage);
+            color: var(--surface-elevated);
+            transform: scale(1.05);
         }
 
         .photo-img {
             width: 100%;
             height: 300px;
             object-fit: cover;
-            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            background: linear-gradient(135deg, var(--surface-secondary) 0%, var(--surface-tertiary) 100%);
         }
 
         .card-content {
-            padding: 16px;
+            padding: var(--space-large);
         }
 
         .card-month {
-            font-size: 12px;
+            font-size: 16px;
             text-transform: uppercase;
-            color: #667eea;
-            font-weight: 500;
-            letter-spacing: 1px;
+            color: var(--accent-sage-deep);
+            font-weight: 600;
+            letter-spacing: 1.5px;
         }
 
         .card-date {
             font-size: 14px;
-            color: #999;
+            color: var(--text-muted);
             margin-top: 4px;
+            line-height: 1.5;
         }
 
         .card-filename {
             font-size: 12px;
-            color: #999;
+            color: var(--text-muted);
             margin-top: 8px;
-            font-family: monospace;
+            font-family: 'SF Mono', 'Consolas', monospace;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -137,7 +232,7 @@
         .score-badge {
             flex: 1;
             padding: 8px;
-            border-radius: 8px;
+            border-radius: var(--radius-medium);
             text-align: center;
             font-size: 12px;
         }
@@ -170,10 +265,10 @@
 
         .rank-badge {
             position: absolute;
-            top: 16px;
-            left: 16px;
+            top: var(--space-medium);
+            left: var(--space-medium);
             background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
+            color: var(--accent-sage);
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -182,7 +277,7 @@
             justify-content: center;
             font-weight: 700;
             font-size: 18px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow-soft);
         }
 
         .photo-wrapper {
@@ -190,18 +285,18 @@
         }
 
         .timeline {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
+            background: var(--surface-elevated);
+            border-radius: var(--radius-medium);
+            padding: var(--space-large);
             margin-bottom: 32px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-soft);
         }
 
         .timeline-title {
             font-size: 16px;
             font-weight: 500;
-            margin-bottom: 16px;
-            color: #333;
+            margin-bottom: var(--space-medium);
+            color: var(--text-primary);
         }
 
         .months-row {
@@ -211,29 +306,250 @@
         }
 
         .month-pill {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: #f5f5f5;
-            color: #999;
+            padding: 8px var(--space-medium);
+            border-radius: var(--radius-pill);
+            background: var(--surface-secondary);
+            color: var(--text-tertiary);
             font-size: 13px;
             white-space: nowrap;
-            transition: all 0.3s;
+            transition: all var(--transition-standard);
         }
 
         .month-pill.active {
-            background: #667eea;
-            color: white;
+            background: var(--accent-sage);
+            color: var(--surface-elevated);
             font-weight: 500;
+        }
+
+        .empty-month {
+            background: #F3F3F3;
+            border: 1px solid #E5E5E5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            min-height: 400px;
+            transition: var(--transition-standard);
+        }
+
+        .empty-month:hover {
+            opacity: 0.8;
+            border-color: #D0D0D0;
+        }
+
+        .empty-month-content {
+            text-align: center;
+            padding: var(--space-large);
+        }
+
+        .empty-month .month-name {
+            font-size: 1.2em;
+            color: var(--accent-sage);
+            font-weight: 500;
+            margin-bottom: 0.5em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .empty-month .empty-hint {
+            font-size: 2em;
+            color: var(--text-tertiary);
+            opacity: 0.4;
+        }
+
+        .sync-button {
+            background: var(--accent-sage);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-medium);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition-standard);
+            font-family: var(--font-sans);
+        }
+
+        .sync-button:hover {
+            background: var(--accent-sage-deep);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .sync-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .sync-status {
+            margin-left: 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .rotating {
+            animation: rotate 1s linear infinite;
         }
 
         @media (max-width: 768px) {
             .photo-grid {
                 grid-template-columns: 1fr;
+                gap: var(--space-medium);
             }
 
             .year-title {
                 font-size: 36px;
             }
+        }
+
+        /* ============================================
+           SWAP MODAL STYLES
+           ============================================ */
+        .swap-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(42, 40, 37, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swap-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface-primary);
+            border-radius: var(--radius-large);
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: var(--shadow-high);
+        }
+
+        .modal-header {
+            padding: var(--space-large);
+            border-bottom: 1px solid var(--surface-tertiary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px 8px;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--surface-tertiary);
+            padding: 0 var(--space-large);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: var(--space-medium) var(--space-large);
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all var(--transition-fast);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-sage-deep);
+            border-bottom-color: var(--accent-sage-deep);
+        }
+
+        .modal-body {
+            padding: var(--space-large);
+            max-height: calc(85vh - 200px);
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .alternatives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: var(--space-medium);
+        }
+
+        .alt-photo-card {
+            cursor: pointer;
+            border-radius: var(--radius-small);
+            overflow: hidden;
+            border: 3px solid transparent;
+            transition: all var(--transition-fast);
+        }
+
+        .alt-photo-card:hover {
+            border-color: var(--accent-sage);
+            transform: scale(1.05);
+        }
+
+        .alt-photo-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .alt-photo-info {
+            padding: var(--space-small);
+            background: var(--surface-elevated);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .month-group {
+            margin-bottom: var(--space-xlarge);
+        }
+
+        .month-group-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-sage-deep);
+            margin-bottom: var(--space-medium);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
     </style>
 </head>
@@ -247,6 +563,14 @@
 
             <div class="stats-row" id="stats">
                 <!-- Stats will be loaded dynamically -->
+            </div>
+
+            <div class="sync-controls" style="margin-top: 24px;">
+                <button id="syncButton" class="sync-button">
+                    <i class="material-icons">sync</i>
+                    Sync with Google Photos
+                </button>
+                <span id="syncStatus" class="sync-status"></span>
             </div>
         </div>
     </div>
@@ -267,6 +591,41 @@
     </div>
 </div>
 
+<!-- Swap Photo Modal -->
+<div class="swap-modal" id="swapModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">Swap Photo for Month</h2>
+            <button class="close-btn" onclick="closeSwapModal()">&times;</button>
+        </div>
+
+        <div class="modal-tabs">
+            <button class="tab-btn active" onclick="switchTab('auto')">Auto Pick</button>
+            <button class="tab-btn" onclick="switchTab('browse')">Browse All</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="tab-content active" id="autoTab">
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Best alternatives from the same capture month (photos taken at the same time):
+                </p>
+                <div class="alternatives-grid" id="autoPickGrid">
+                    <!-- Auto-picked alternatives will be loaded here -->
+                </div>
+            </div>
+
+            <div class="tab-content" id="browseTab">
+                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                    Choose from all 35 photos (sorted by quality score):
+                </p>
+                <div id="browseAllGrid">
+                    <!-- All photos will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Load the curation data and render the gallery
 async function loadGallery() {
@@ -280,103 +639,437 @@ async function loadGallery() {
     }
 }
 
+function createMonthSlots() {
+    const months = [
+        'January', 'February', 'March', 'April',
+        'May', 'June', 'July', 'August',
+        'September', 'October', 'November', 'December'
+    ];
+
+    return months.map((name, index) => ({
+        monthIndex: index,
+        monthName: name,
+        photo: null
+    }));
+}
+
+function selectBestPhoto(photos) {
+    if (photos.length === 1) return photos[0];
+
+    return photos.sort((a, b) => {
+        if (b.emotional_score !== a.emotional_score) {
+            return b.emotional_score - a.emotional_score;
+        }
+        return b.combined_score - a.combined_score;
+    })[0];
+}
+
+function distributePhotos(photos, monthSlots) {
+    const photosByMonth = new Map();
+    photos.forEach(photo => {
+        const monthIndex = photo.month - 1;
+        if (!photosByMonth.has(monthIndex)) {
+            photosByMonth.set(monthIndex, []);
+        }
+        photosByMonth.get(monthIndex).push(photo);
+    });
+
+    photosByMonth.forEach((photosInMonth, monthIndex) => {
+        monthSlots[monthIndex].photo = selectBestPhoto(photosInMonth);
+    });
+
+    return monthSlots;
+}
+
 function renderGallery(data) {
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                         'July', 'August', 'September', 'October', 'November', 'December'];
     const monthShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    // Update header
+    const monthSlots = createMonthSlots();
+
+    // Use month_distribution from curator if available (flexible distribution)
+    if (data.month_distribution) {
+        monthSlots.forEach(slot => {
+            slot.photo = data.month_distribution[slot.monthName];
+        });
+    } else {
+        // Fallback to old distribution logic
+        distributePhotos(data.photos, monthSlots);
+    }
+
+    const filledMonths = monthSlots.filter(slot => slot.photo !== null).length;
+
     document.getElementById('year').textContent = data.year;
     document.getElementById('subtitle').textContent =
-        `Your year in ${data.photos.length === 12 ? 'twelve' : data.photos.length} unforgettable moments`;
+        `Your year in ${filledMonths === 12 ? 'twelve' : filledMonths} unforgettable moments`;
 
-    // Update stats
     const stats = data.stats;
     document.getElementById('stats').innerHTML = `
         <div class="stat-chip">
             <i class="material-icons">photo_camera</i>
-            ${data.photos.length} photos selected
+            ${data.photos.length} photos from ${filledMonths} months
         </div>
-        <div class="stat-chip">
-            <i class="material-icons">calendar_today</i>
-            ${stats.months_represented} months represented
-        </div>
-        <div class="stat-chip">
+        ${stats.avg_combined ? `<div class="stat-chip">
             <i class="material-icons">star</i>
             Avg score: ${stats.avg_combined.toFixed(1)}/100
-        </div>
-        <div class="stat-chip">
+        </div>` : ''}
+        ${stats.photos_with_faces !== undefined ? `<div class="stat-chip">
             <i class="material-icons">face</i>
             ${stats.photos_with_faces} with faces
-        </div>
+        </div>` : ''}
     `;
 
-    // Update timeline
-    const activeMonths = new Set(data.photos.map(p => p.month).filter(m => m !== null));
+    const activeMonths = new Set(monthSlots.filter(s => s.photo).map(s => s.monthIndex + 1));
     const timelineHTML = monthShort.map((month, i) => {
         const isActive = activeMonths.has(i + 1);
         return `<div class="month-pill ${isActive ? 'active' : ''}">${month}</div>`;
     }).join('');
     document.getElementById('timeline').innerHTML = timelineHTML;
 
-    // Update photo grid
-    const photoGridHTML = data.photos.map((photo, index) => {
-        const date = new Date(photo.timestamp);
-        const monthName = monthNames[date.getMonth()].toUpperCase();
-        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        const filename = photo.photo_path.split('/').pop();
+    const photoGridHTML = monthSlots.map((slot, monthIndex) => {
+        if (slot.photo) {
+            const photo = slot.photo;
+            // Find photo index by matching photo_path
+            const photoIndex = data.photos.findIndex(p => p.photo_path === photo.photo_path);
+            const date = new Date(photo.timestamp);
+            // Use the calendar month slot, not the photo's capture month
+            const monthName = slot.monthName.toUpperCase();
+            const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const filename = photo.photo_path.split('/').pop();
 
-        // Get file extension from original path
-        const ext = filename.split('.').pop();
-        const photoSrc = `photos/${index}.${ext}`;
+            // All photos are converted to JPG/JPEG for browser compatibility
+            let ext = filename.split('.').pop().toLowerCase();
+            if (ext === 'heic') {
+                ext = 'jpg';  // HEIC files are converted to JPG
+            } else if (ext === 'jpeg') {
+                ext = 'jpg';  // Normalize jpeg to jpg
+            }
+            const photoSrc = `photos/${photoIndex}.${ext}`;
 
-        const combinedClass = photo.combined_score >= 70 ? 'high' :
-                             photo.combined_score >= 50 ? 'medium' : 'low';
-        const qualityClass = photo.quality_score >= 70 ? 'high' :
-                            photo.quality_score >= 50 ? 'medium' : 'low';
-        const emotionalClass = photo.emotional_score >= 70 ? 'high' :
-                              photo.emotional_score >= 50 ? 'medium' : 'low';
+            const combinedClass = photo.combined_score >= 70 ? 'high' :
+                                 photo.combined_score >= 50 ? 'medium' : 'low';
+            const qualityClass = photo.quality_score >= 70 ? 'high' :
+                                photo.quality_score >= 50 ? 'medium' : 'low';
+            const emotionalClass = photo.emotional_score >= 70 ? 'high' :
+                                  photo.emotional_score >= 50 ? 'medium' : 'low';
 
-        return `
-            <div class="photo-card">
-                <div class="photo-wrapper">
-                    <div class="rank-badge">${index + 1}</div>
-                    <img src="${photoSrc}" class="photo-img" alt="${filename}" loading="lazy">
-                </div>
-                <div class="card-content">
-                    <div class="card-month">${monthName}</div>
-                    <div class="card-date">${dateStr}</div>
-                    <div class="card-filename">${filename}</div>
-
-                    <div class="score-row">
-                        <div class="score-badge ${combinedClass}">
-                            <div class="score-label">Combined</div>
-                            <div class="score-value">${Math.round(photo.combined_score)}</div>
+            return `
+                <div class="photo-card" data-month-slot="${slot.monthName}">
+                    <div class="photo-wrapper">
+                        <img src="${photoSrc}" class="photo-img" alt="${filename}" loading="lazy">
+                        <div class="swap-overlay">
+                            <button class="swap-btn" onclick="openSwapModal('${slot.monthName}')">
+                                Swap Photo
+                            </button>
                         </div>
-                        <div class="score-badge ${qualityClass}">
-                            <div class="score-label">Quality</div>
-                            <div class="score-value">${Math.round(photo.quality_score)}</div>
-                        </div>
-                        <div class="score-badge ${emotionalClass}">
-                            <div class="score-label">Emotional</div>
-                            <div class="score-value">${Math.round(photo.emotional_score)}</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="card-month">${monthName}</div>
+                        <div class="card-date">${dateStr}</div>
+                        <div class="card-filename">${filename}</div>
+
+                        <div class="score-row">
+                            <div class="score-badge ${combinedClass}">
+                                <div class="score-label">Combined</div>
+                                <div class="score-value">${Math.round(photo.combined_score)}</div>
+                            </div>
+                            <div class="score-badge ${qualityClass}">
+                                <div class="score-label">Quality</div>
+                                <div class="score-value">${Math.round(photo.quality_score)}</div>
+                            </div>
+                            <div class="score-badge ${emotionalClass}">
+                                <div class="score-label">Emotional</div>
+                                <div class="score-value">${Math.round(photo.emotional_score)}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
+        } else {
+            return `
+                <div class="photo-card empty-month" data-month="${monthIndex}">
+                    <div class="empty-month-content">
+                        <div class="month-name">${slot.monthName}</div>
+                        <div class="empty-hint">—</div>
+                    </div>
+                </div>
+            `;
+        }
     }).join('');
 
     document.getElementById('photoGrid').innerHTML = photoGridHTML;
 }
 
-// Load gallery on page load
-loadGallery();
-</script>
+// Sync with Google Photos
+document.getElementById('syncButton')?.addEventListener('click', async () => {
+    const button = document.getElementById('syncButton');
+    const status = document.getElementById('syncStatus');
 
-<!-- Materialize JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    button.disabled = true;
+    button.innerHTML = '<i class="material-icons rotating">sync</i> Syncing...';
+    status.textContent = 'Fetching photos from Google Photos...';
+
+    try {
+        const response = await fetch('/sync', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({year: 2023})
+        });
+
+        if (response.ok) {
+            status.textContent = 'Sync complete! Reloading...';
+            setTimeout(() => {
+                loadGallery();
+                status.textContent = '';
+            }, 1000);
+        } else {
+            throw new Error('Sync failed');
+        }
+    } catch (error) {
+        status.textContent = 'Sync failed. Please try again.';
+        console.error('Sync error:', error);
+    } finally {
+        button.disabled = false;
+        button.innerHTML = '<i class="material-icons">sync</i> Sync with Google Photos';
+    }
+});
+
+// ============================================
+// PHOTO SWAP FUNCTIONALITY
+// ============================================
+
+let galleryData = null; // Store the loaded gallery data
+let currentSwapMonth = null; // Track which month is being swapped
+
+// Update loadGallery to store data globally
+const originalLoadGallery = loadGallery;
+async function loadGallery() {
+    try {
+        const response = await fetch('twelve_2023_balanced.json');
+        galleryData = await response.json();
+        renderGallery(galleryData);
+    } catch (error) {
+        console.error('Error loading gallery:', error);
+        document.getElementById('subtitle').textContent = 'Error loading gallery data';
+    }
+}
+
+// Open swap modal
+function openSwapModal(monthName) {
+    currentSwapMonth = monthName;
+    document.getElementById('modalTitle').textContent = `Swap Photo for ${monthName}`;
+    document.getElementById('swapModal').classList.add('active');
+
+    // Load alternatives for auto-pick tab
+    loadAutoPickAlternatives(monthName);
+
+    // Pre-load browse all photos immediately
+    loadBrowseAllPhotos();
+}
+
+// Close swap modal
+function closeSwapModal() {
+    document.getElementById('swapModal').classList.remove('active');
+    currentSwapMonth = null;
+}
+
+// Switch between tabs
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+    if (tabName === 'auto') {
+        document.getElementById('autoTab').classList.add('active');
+    } else {
+        document.getElementById('browseTab').classList.add('active');
+        // Lazy load browse all content
+        const browseGrid = document.getElementById('browseAllGrid');
+        if (!browseGrid.innerHTML || browseGrid.innerHTML.trim() === '') {
+            loadBrowseAllPhotos();
+        }
+    }
+}
+
+// Load auto-pick alternatives (best photos from same capture month)
+function loadAutoPickAlternatives(monthName) {
+    const grid = document.getElementById('autoPickGrid');
+
+    if (!galleryData || !galleryData.photos_by_capture_month) {
+        grid.innerHTML = '<p>No alternatives available</p>';
+        return;
+    }
+
+    // Get currently selected photo for this calendar slot
+    const currentPhoto = galleryData.month_distribution[monthName];
+
+    if (!currentPhoto) {
+        grid.innerHTML = '<p style="color: var(--text-secondary);">No photo selected for this month yet.</p>';
+        return;
+    }
+
+    // Get the capture month of the current photo
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    const captureMonthName = monthNames[currentPhoto.month - 1];
+
+    // Get all photos from the same capture month
+    const alternatives = galleryData.photos_by_capture_month[captureMonthName] || [];
+
+    // Filter out the currently selected photo and take top 5
+    const topAlternatives = alternatives
+        .filter(p => p.photo_path !== currentPhoto.photo_path)
+        .slice(0, 5);
+
+    if (topAlternatives.length === 0) {
+        grid.innerHTML = '<p style="color: var(--text-secondary);">No alternative photos available for this month. Try "Browse All" to pick from any month.</p>';
+        return;
+    }
+
+    grid.innerHTML = topAlternatives.map(photo => {
+        const photoIndex = galleryData.photos.findIndex(p => p.photo_path === photo.photo_path);
+        const filename = photo.photo_path.split('/').pop();
+        let ext = filename.split('.').pop().toLowerCase();
+        if (ext === 'heic' || ext === 'jpeg') ext = 'jpg';
+        const photoSrc = `photos/${photoIndex}.${ext}`;
+
+        return `
+            <div class="alt-photo-card" onclick="swapPhoto('${monthName}', '${photo.photo_path}')">
+                <img src="${photoSrc}" class="alt-photo-img" alt="${filename}">
+                <div class="alt-photo-info">
+                    Score: ${Math.round(photo.combined_score)}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Load all photos - show ALL 35 photos so user can pick anything
+function loadBrowseAllPhotos() {
+    console.log('=== loadBrowseAllPhotos called ===');
+    const grid = document.getElementById('browseAllGrid');
+
+    if (!galleryData) {
+        console.error('No galleryData!');
+        grid.innerHTML = '<p>No gallery data loaded</p>';
+        return;
+    }
+
+    if (!galleryData.photos) {
+        console.error('No photos in galleryData!');
+        grid.innerHTML = '<p>No photos available</p>';
+        return;
+    }
+
+    console.log('Total photos available:', galleryData.photos.length);
+
+    // Show ALL photos sorted by quality score
+    const allPhotos = [...galleryData.photos].sort((a, b) => b.combined_score - a.combined_score);
+
+    const htmlContent = `
+        <div class="alternatives-grid">
+            ${allPhotos.map(photo => {
+                const photoIndex = galleryData.photos.findIndex(p => p.photo_path === photo.photo_path);
+                const filename = photo.photo_path.split('/').pop();
+                let ext = filename.split('.').pop().toLowerCase();
+                if (ext === 'heic' || ext === 'jpeg') ext = 'jpg';
+                const photoSrc = `photos/${photoIndex}.${ext}`;
+
+                return `
+                    <div class="alt-photo-card" onclick="swapPhoto('${currentSwapMonth}', '${photo.photo_path}')">
+                        <img src="${photoSrc}" class="alt-photo-img" alt="${filename}">
+                        <div class="alt-photo-info">
+                            Score: ${Math.round(photo.combined_score)}
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+
+    grid.innerHTML = htmlContent;
+    console.log('HTML set, grid innerHTML length:', grid.innerHTML.length);
+}
+
+// Swap the photo
+function swapPhoto(monthSlot, newPhotoPath) {
+    if (!galleryData) return;
+
+    // Find the new photo object
+    const newPhoto = galleryData.photos.find(p => p.photo_path === newPhotoPath);
+    if (!newPhoto) {
+        console.error('Photo not found:', newPhotoPath);
+        return;
+    }
+
+    // Update the month distribution
+    galleryData.month_distribution[monthSlot] = newPhoto;
+
+    // Track user swap
+    if (!galleryData.user_swaps) {
+        galleryData.user_swaps = {};
+    }
+    galleryData.user_swaps[monthSlot] = newPhotoPath;
+
+    // Save to localStorage for persistence
+    try {
+        localStorage.setItem('twelve_user_swaps', JSON.stringify(galleryData.user_swaps));
+    } catch (e) {
+        console.error('Could not save swap preference:', e);
+    }
+
+    // Re-render the gallery
+    renderGallery(galleryData);
+
+    // Close the modal
+    closeSwapModal();
+
+    console.log(`Swapped ${monthSlot} to ${newPhotoPath}`);
+}
+
+// Load user swaps from localStorage on page load
+function loadUserSwaps() {
+    try {
+        const saved = localStorage.getItem('twelve_user_swaps');
+        if (saved && galleryData) {
+            const swaps = JSON.parse(saved);
+            galleryData.user_swaps = swaps;
+
+            // Apply saved swaps
+            Object.keys(swaps).forEach(monthSlot => {
+                const photoPath = swaps[monthSlot];
+                const photo = galleryData.photos.find(p => p.photo_path === photoPath);
+                if (photo) {
+                    galleryData.month_distribution[monthSlot] = photo;
+                }
+            });
+
+            // Re-render with user preferences
+            renderGallery(galleryData);
+        }
+    } catch (e) {
+        console.error('Could not load swap preferences:', e);
+    }
+}
+
+// Close modal when clicking outside
+document.getElementById('swapModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'swapModal') {
+        closeSwapModal();
+    }
+});
+
+// Load gallery on page load
+loadGallery().then(() => {
+    // Load user swaps after gallery is loaded
+    loadUserSwaps();
+});
+</script>
 
 </body>
 </html>

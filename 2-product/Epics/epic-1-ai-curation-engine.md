@@ -53,6 +53,7 @@ This epic comprises the following features:
 4. **Feature 1.4: Twelve Selection Algorithm** - Combines signals to select optimal twelve photos
 5. **Feature 1.5: Manual Override Interface** - Allows users to swap, pin, or exclude photos
 6. **Feature 1.6: Curation Transparency Dashboard** - Shows why photos were selected
+7. **Feature 1.7: Interactive Photo Swap** ✅ **COMPLETED** - Full-featured photo swapping with auto-pick and browse all options
 
 ---
 
@@ -156,3 +157,4 @@ This epic comprises the following features:
 | Version | Date       | Author     | Changes                     |
 | ------- | ---------- | ---------- | --------------------------- |
 | v1.0    | 2025-10-10 | Chris Park | Initial epic created.       |
+| v1.1    | 2025-10-29 | Chris Park | Added Feature 1.7 - Interactive Photo Swap completed |
