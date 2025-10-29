@@ -5,59 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remember Twelve - 2023</title>
 
-    <!-- Material Design CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Typography - Inter (clean sans-serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Optional serif for warmth in headlines -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
     <style>
+        /* ============================================
+           MARU COFFEE AESTHETIC VARIABLES
+           ============================================ */
+        :root {
+            /* Colors - Warm Neutrals */
+            --surface-primary: #FAFAF8;
+            --surface-secondary: #F3F3F3;
+            --surface-tertiary: #EEEDE9;
+            --surface-elevated: #FFFFFF;
+
+            /* Accents - Muted Natural Tones */
+            --accent-sage: #7396A2;
+            --accent-sage-deep: #5487A0;
+
+            /* Text - Warm Charcoal */
+            --text-primary: #2A2825;
+            --text-secondary: #5A5551;
+            --text-tertiary: #8A857F;
+            --text-muted: #6B6864;
+
+            /* Shadows - 4-Layer System */
+            --shadow-soft:
+                0 0 0 1px rgba(42, 40, 37, 0.04),
+                0 1px 2px rgba(42, 40, 37, 0.06),
+                0 4px 8px rgba(42, 40, 37, 0.04);
+
+            --shadow-medium:
+                0 0 0 1px rgba(42, 40, 37, 0.04),
+                0 2px 4px rgba(42, 40, 37, 0.08),
+                0 8px 16px rgba(42, 40, 37, 0.08);
+
+            /* Corner Radius */
+            --radius-small: 6px;
+            --radius-medium: 8px;
+            --radius-large: 12px;
+            --radius-pill: 20px;
+
+            /* Spacing */
+            --space-small: 8px;
+            --space-medium: 16px;
+            --space-large: 24px;
+            --space-xlarge: 40px;
+
+            /* Motion */
+            --transition-standard: 350ms cubic-bezier(0.4, 0.0, 0.2, 1);
+
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Merriweather', Georgia, serif;
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-sans);
+            background: var(--surface-primary);
             min-height: 100vh;
             margin: 0;
             padding: 0;
         }
 
         .header {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 24px 0;
-            margin-bottom: 32px;
+            background: var(--surface-elevated);
+            box-shadow: var(--shadow-soft);
+            padding: var(--space-large) 0;
+            margin-bottom: var(--space-xlarge);
         }
 
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 var(--space-large);
         }
 
         .year-title {
+            font-family: var(--font-serif);
             font-size: 48px;
             font-weight: 300;
             margin: 0;
-            color: #667eea;
+            color: var(--accent-sage);
+            line-height: 1.1;
         }
 
         .subtitle {
             font-size: 18px;
-            color: #666;
+            color: var(--text-secondary);
             margin: 8px 0 0 0;
+            line-height: 1.5;
         }
 
         .stats-row {
-            margin-top: 16px;
+            margin-top: var(--space-medium);
             display: flex;
-            gap: 24px;
+            gap: var(--space-large);
             flex-wrap: wrap;
         }
 
         .stat-chip {
-            background: #f5f5f5;
-            padding: 8px 16px;
-            border-radius: 16px;
+            background: #F3F3F3;
+            padding: 8px var(--space-medium);
+            border-radius: var(--radius-medium);
             font-size: 14px;
-            color: #555;
+            color: #5A5551;
         }
 
         .stat-chip .material-icons {
@@ -69,39 +124,39 @@
         .container-custom {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px 48px 24px;
+            padding: 0 var(--space-large) 48px var(--space-large);
         }
 
         .photo-list {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: var(--space-medium);
             margin-top: 32px;
         }
 
         .photo-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            background: var(--surface-elevated);
+            border-radius: var(--radius-medium);
+            padding: var(--space-large);
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition-standard);
         }
 
         .photo-card:hover {
-            transform: translateX(8px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            transform: translateX(4px);
+            box-shadow: var(--shadow-medium);
         }
 
         .photo-header {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: var(--space-medium);
+            margin-bottom: var(--space-medium);
         }
 
         .rank-badge {
-            background: #667eea;
-            color: white;
+            background: var(--accent-sage);
+            color: var(--surface-elevated);
             width: 48px;
             height: 48px;
             border-radius: 50%;
@@ -120,60 +175,62 @@
         .photo-month {
             font-size: 12px;
             text-transform: uppercase;
-            color: #667eea;
+            color: var(--accent-sage);
             font-weight: 500;
             letter-spacing: 1px;
         }
 
         .photo-date {
             font-size: 16px;
-            color: #333;
+            color: var(--text-primary);
             margin-top: 4px;
             font-weight: 500;
+            line-height: 1.5;
         }
 
         .photo-path {
             font-size: 13px;
-            color: #666;
+            color: var(--text-muted);
             margin-top: 12px;
             padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            background: var(--surface-secondary);
+            border-radius: var(--radius-medium);
             font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
             word-break: break-all;
             cursor: pointer;
+            transition: all var(--transition-standard);
         }
 
         .photo-path:hover {
-            background: #e9ecef;
+            background: var(--surface-tertiary);
         }
 
         .score-row {
             display: flex;
             gap: 12px;
-            margin-top: 16px;
+            margin-top: var(--space-medium);
         }
 
         .score-badge {
             flex: 1;
             padding: 12px;
-            border-radius: 12px;
+            border-radius: var(--radius-medium);
             text-align: center;
         }
 
         .score-badge.high {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: #E8F0E8;
+            color: #4A6B4A;
         }
 
         .score-badge.medium {
-            background: #fff3e0;
-            color: #e65100;
+            background: #F5EFE6;
+            color: #9C7E5C;
         }
 
         .score-badge.low {
-            background: #ffebee;
-            color: #c62828;
+            background: #F5E8E6;
+            color: #A15B4A;
         }
 
         .score-label {
@@ -190,18 +247,18 @@
         }
 
         .timeline {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
+            background: var(--surface-elevated);
+            border-radius: var(--radius-medium);
+            padding: var(--space-large);
             margin-bottom: 32px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-soft);
         }
 
         .timeline-title {
             font-size: 16px;
             font-weight: 500;
-            margin-bottom: 16px;
-            color: #333;
+            margin-bottom: var(--space-medium);
+            color: var(--text-primary);
         }
 
         .months-row {
@@ -211,27 +268,27 @@
         }
 
         .month-pill {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: #f5f5f5;
-            color: #999;
+            padding: 8px var(--space-medium);
+            border-radius: var(--radius-pill);
+            background: var(--surface-secondary);
+            color: var(--text-tertiary);
             font-size: 13px;
             white-space: nowrap;
-            transition: all 0.3s;
+            transition: all var(--transition-standard);
         }
 
         .month-pill.active {
-            background: #667eea;
-            color: white;
+            background: var(--accent-sage);
+            color: var(--surface-elevated);
             font-weight: 500;
         }
 
         .face-badge {
             display: inline-block;
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: #E8F0E8;
+            color: #4A6B4A;
             padding: 4px 12px;
-            border-radius: 12px;
+            border-radius: var(--radius-large);
             font-size: 12px;
             font-weight: 500;
             margin-left: 8px;
@@ -538,9 +595,6 @@ document.querySelectorAll('.photo-path').forEach(el => {
     });
 });
 </script>
-
-<!-- Materialize JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 
 </body>
 </html>

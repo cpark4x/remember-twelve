@@ -74,6 +74,11 @@ def main():
         default='google_photos_credentials.json',
         help='Path to OAuth credentials (default: google_photos_credentials.json)'
     )
+    parser.add_argument(
+        '--flexible-months',
+        action='store_true',
+        help='Fill empty months with photos from other months'
+    )
 
     args = parser.parse_args()
 
@@ -168,6 +173,17 @@ def main():
         print(f"✓ Curation complete!")
         print(f"  Analyzed {photo_count} photos in {elapsed:.1f}s")
         print()
+
+        # Distribute to 12 months if flexible mode enabled
+        if args.flexible_months:
+            print("Step 5: Distributing photos to 12 months...")
+            month_distribution = curator.distribute_to_twelve_months(
+                selection.photos,
+                flexible=True
+            )
+            filled_months = sum(1 for photo in month_distribution.values() if photo is not None)
+            print(f"✓ Photos distributed across {filled_months} months")
+            print()
 
     except Exception as e:
         print(f"✗ Curation failed: {e}")

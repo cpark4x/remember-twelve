@@ -115,23 +115,43 @@ The complete Google Photos integration is now live! Curate your best 12 photos f
 
 ### Curate Photos
 
+**Option A: CLI (Simple)**
 ```bash
 # Curate your best 12 photos from 2023
 python curate_from_google_photos.py --year 2023
 
-# Use different strategy
-python curate_from_google_photos.py --year 2024 --strategy people_first
+# Use different strategy with flexible month distribution
+python curate_from_google_photos.py --year 2024 --strategy people_first --flexible-months
 
 # Strategies: balanced, aesthetic_first, people_first, top_heavy
 ```
 
-The script will:
+**Option B: Web Viewer with Sync (Better UX)**
+```bash
+# Terminal 1: Start photo server
+cd ui && python3 photo_server.py
+
+# Terminal 2: Start sync server (optional)
+python3 ui/sync_server.py
+
+# Open browser: http://localhost:8000/viewer_dynamic.html
+# Click "Sync with Google Photos" button to fetch and curate
+```
+
+**Option C: Shell Script**
+```bash
+# One-command sync
+./sync_photos.sh 2023
+```
+
+The curation process:
 1. ✅ Authenticate with Google Photos (browser opens)
 2. ✅ Fetch all photos from specified year
 3. ✅ Analyze quality + emotional significance
 4. ✅ Apply AI curation algorithm
 5. ✅ Select best 12 photos with diversity
-6. ✅ Save results with Google Photos links
+6. ✅ Distribute flexibly across 12 months (optional)
+7. ✅ Save results with Google Photos links
 
 Results saved to `twelve_{year}_{strategy}.json` with clickable Google Photos links!
 
@@ -154,6 +174,9 @@ Results saved to `twelve_{year}_{strategy}.json` with clickable Google Photos li
 - Emotional significance detection (faces, emotions, intimacy)
 - Balanced temporal distribution across months
 - Visual diversity filtering
+- **Flexible month distribution** (fills empty months with best available photos)
+- **Web viewer with sync button** (one-click Google Photos sync)
+- **Shell script bridge** for easy automation
 - Results with Google Photos links
 
 ### Next Steps

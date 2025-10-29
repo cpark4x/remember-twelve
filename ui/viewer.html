@@ -5,59 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Remember Twelve - 2023</title>
 
-    <!-- Material Design CSS -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Typography - Inter (clean sans-serif) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Optional serif for warmth in headlines -->
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
     <style>
+        /* ============================================
+           MARU COFFEE AESTHETIC VARIABLES
+           ============================================ */
+        :root {
+            /* Colors - Warm Neutrals */
+            --surface-primary: #FAFAF8;
+            --surface-secondary: #F3F3F3;
+            --surface-tertiary: #EEEDE9;
+            --surface-elevated: #FFFFFF;
+
+            /* Accents - Muted Natural Tones */
+            --accent-sage: #7396A2;
+            --accent-sage-deep: #5487A0;
+
+            /* Text - Warm Charcoal */
+            --text-primary: #2A2825;
+            --text-secondary: #5A5551;
+            --text-tertiary: #8A857F;
+            --text-muted: #6B6864;
+
+            /* Shadows - 4-Layer System */
+            --shadow-soft:
+                0 0 0 1px rgba(42, 40, 37, 0.04),
+                0 1px 2px rgba(42, 40, 37, 0.06),
+                0 4px 8px rgba(42, 40, 37, 0.04);
+
+            --shadow-medium:
+                0 0 0 1px rgba(42, 40, 37, 0.04),
+                0 2px 4px rgba(42, 40, 37, 0.08),
+                0 8px 16px rgba(42, 40, 37, 0.08);
+
+            /* Corner Radius */
+            --radius-small: 6px;
+            --radius-medium: 8px;
+            --radius-large: 12px;
+            --radius-pill: 20px;
+
+            /* Spacing */
+            --space-small: 8px;
+            --space-medium: 16px;
+            --space-large: 24px;
+            --space-xlarge: 40px;
+
+            /* Motion */
+            --transition-standard: 350ms cubic-bezier(0.4, 0.0, 0.2, 1);
+
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Merriweather', Georgia, serif;
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: var(--font-sans);
+            background: var(--surface-primary);
             min-height: 100vh;
             margin: 0;
             padding: 0;
         }
 
         .header {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 24px 0;
-            margin-bottom: 32px;
+            background: var(--surface-elevated);
+            box-shadow: var(--shadow-soft);
+            padding: var(--space-large) 0;
+            margin-bottom: var(--space-xlarge);
         }
 
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 var(--space-large);
         }
 
         .year-title {
+            font-family: var(--font-serif);
             font-size: 48px;
             font-weight: 300;
             margin: 0;
-            color: #667eea;
+            color: var(--accent-sage);
+            line-height: 1.1;
         }
 
         .subtitle {
             font-size: 18px;
-            color: #666;
+            color: var(--text-secondary);
             margin: 8px 0 0 0;
+            line-height: 1.5;
         }
 
         .stats-row {
-            margin-top: 16px;
+            margin-top: var(--space-medium);
             display: flex;
-            gap: 24px;
+            gap: var(--space-large);
             flex-wrap: wrap;
         }
 
         .stat-chip {
-            background: #f5f5f5;
-            padding: 8px 16px;
-            border-radius: 16px;
+            background: #F3F3F3;
+            padding: 8px var(--space-medium);
+            border-radius: var(--radius-medium);
             font-size: 14px;
-            color: #555;
+            color: #5A5551;
         }
 
         .stat-chip .material-icons {
@@ -69,64 +124,72 @@
         .container-custom {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px 48px 24px;
+            padding: 0 var(--space-large) 48px var(--space-large);
         }
 
         .photo-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
+            gap: var(--space-large);
             margin-top: 32px;
         }
 
         .photo-card {
-            background: white;
-            border-radius: 16px;
+            background: var(--surface-elevated);
+            border-radius: var(--radius-medium);
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition-standard);
             cursor: pointer;
         }
 
         .photo-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
         }
 
         .photo-placeholder {
             width: 100%;
             height: 300px;
-            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            background: linear-gradient(135deg, var(--surface-secondary) 0%, var(--surface-tertiary) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #999;
+            color: var(--text-tertiary);
             font-size: 48px;
         }
 
+        .photo-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
         .card-content {
-            padding: 16px;
+            padding: var(--space-large);
         }
 
         .card-month {
             font-size: 12px;
             text-transform: uppercase;
-            color: #667eea;
+            color: var(--accent-sage);
             font-weight: 500;
             letter-spacing: 1px;
         }
 
         .card-date {
             font-size: 14px;
-            color: #999;
+            color: var(--text-muted);
             margin-top: 4px;
+            line-height: 1.5;
         }
 
         .card-filename {
             font-size: 12px;
-            color: #999;
+            color: var(--text-muted);
             margin-top: 8px;
-            font-family: monospace;
+            font-family: 'SF Mono', 'Consolas', monospace;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -141,24 +204,24 @@
         .score-badge {
             flex: 1;
             padding: 8px;
-            border-radius: 8px;
+            border-radius: var(--radius-medium);
             text-align: center;
             font-size: 12px;
         }
 
         .score-badge.high {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: #E8F0E8;
+            color: #4A6B4A;
         }
 
         .score-badge.medium {
-            background: #fff3e0;
-            color: #e65100;
+            background: #F5EFE6;
+            color: #9C7E5C;
         }
 
         .score-badge.low {
-            background: #ffebee;
-            color: #c62828;
+            background: #F5E8E6;
+            color: #A15B4A;
         }
 
         .score-label {
@@ -174,10 +237,10 @@
 
         .rank-badge {
             position: absolute;
-            top: 16px;
-            left: 16px;
+            top: var(--space-medium);
+            left: var(--space-medium);
             background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
+            color: var(--accent-sage);
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -186,7 +249,7 @@
             justify-content: center;
             font-weight: 700;
             font-size: 18px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow-soft);
         }
 
         .photo-wrapper {
@@ -194,18 +257,18 @@
         }
 
         .timeline {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
+            background: var(--surface-elevated);
+            border-radius: var(--radius-medium);
+            padding: var(--space-large);
             margin-bottom: 32px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-soft);
         }
 
         .timeline-title {
             font-size: 16px;
             font-weight: 500;
-            margin-bottom: 16px;
-            color: #333;
+            margin-bottom: var(--space-medium);
+            color: var(--text-primary);
         }
 
         .months-row {
@@ -215,24 +278,62 @@
         }
 
         .month-pill {
-            padding: 8px 16px;
-            border-radius: 20px;
-            background: #f5f5f5;
-            color: #999;
+            padding: 8px var(--space-medium);
+            border-radius: var(--radius-pill);
+            background: var(--surface-secondary);
+            color: var(--text-tertiary);
             font-size: 13px;
             white-space: nowrap;
-            transition: all 0.3s;
+            transition: all var(--transition-standard);
         }
 
         .month-pill.active {
-            background: #667eea;
-            color: white;
+            background: var(--accent-sage);
+            color: var(--surface-elevated);
             font-weight: 500;
+        }
+
+        .empty-month {
+            background: #F3F3F3;
+            border: 1px solid #E5E5E5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            min-height: 400px;
+            transition: var(--transition-standard);
+        }
+
+        .empty-month:hover {
+            opacity: 0.8;
+            border-color: #D0D0D0;
+        }
+
+        .empty-month-content {
+            text-align: center;
+            padding: var(--space-large);
+        }
+
+        .empty-month .month-name {
+            font-size: 1.2em;
+            color: var(--accent-sage);
+            font-weight: 500;
+            margin-bottom: 0.5em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .empty-month .empty-hint {
+            font-size: 2em;
+            color: var(--text-tertiary);
+            opacity: 0.4;
         }
 
         @media (max-width: 768px) {
             .photo-grid {
                 grid-template-columns: 1fr;
+                gap: var(--space-medium);
             }
 
             .year-title {
@@ -246,16 +347,12 @@
 <div class="header">
     <div class="header-content">
         <h1 class="year-title">2023</h1>
-        <p class="subtitle">Your year in eight unforgettable moments</p>
+        <p class="subtitle">Your year in unforgettable moments</p>
 
         <div class="stats-row">
             <div class="stat-chip">
                 <i class="material-icons">photo_camera</i>
-                8 photos selected
-            </div>
-            <div class="stat-chip">
-                <i class="material-icons">calendar_today</i>
-                3 months represented
+                8 photos from 3 months
             </div>
             <div class="stat-chip">
                 <i class="material-icons">star</i>
@@ -289,19 +386,26 @@
         </div>
     </div>
 
-    <!-- Photo Grid -->
+    <!-- Photo Grid - 12 Month Timeline -->
     <div class="photo-grid">
-        <!-- Photo 1: Library - 159 of 310.HEIC (Big Sky, Feb) -->
+        <!-- January - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">January</div>
+                <div class="empty-hint">—</div>
+            </div>
+        </div>
+
+        <!-- February - Big Sky -->
         <div class="photo-card">
             <div class="photo-wrapper">
                 <div class="rank-badge">1</div>
-                <div class="photo-placeholder">🏔️</div>
+                <img src="photos/0.HEIC" alt="Big Sky, February 2023" class="photo-image">
             </div>
             <div class="card-content">
                 <div class="card-month">FEBRUARY</div>
                 <div class="card-date">Feb 23, 2023</div>
                 <div class="card-filename">Library - 159 of 310.HEIC</div>
-
                 <div class="score-row">
                     <div class="score-badge low">
                         <div class="score-label">Combined</div>
@@ -319,11 +423,59 @@
             </div>
         </div>
 
-        <!-- Photo 2: Library - 261 of 310.jpeg (Chelan, Sep) - HIGH SCORE WITH FACES -->
+        <!-- March - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">March</div>
+                <div class="empty-hint">—</div>
+            </div>
+        </div>
+
+        <!-- April - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">April</div>
+                <div class="empty-hint">—</div>
+            </div>
+        </div>
+
+        <!-- May - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">May</div>
+                <div class="empty-hint">—</div>
+            </div>
+        </div>
+
+        <!-- June - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">June</div>
+                <div class="empty-hint">—</div>
+            </div>
+        </div>
+
+        <!-- July - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">July</div>
+                <div class="empty-hint">—</div>
+            </div>
+        </div>
+
+        <!-- August - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">August</div>
+                <div class="empty-hint">—</div>
+            </div>
+        </div>
+
+        <!-- September - Best photo (highest emotional score) -->
         <div class="photo-card">
             <div class="photo-wrapper">
                 <div class="rank-badge">2</div>
-                <div class="photo-placeholder">😊</div>
+                <img src="photos/1.jpeg" alt="Chelan with faces, September 2023" class="photo-image">
             </div>
             <div class="card-content">
                 <div class="card-month">SEPTEMBER</div>
@@ -346,146 +498,27 @@
             </div>
         </div>
 
-        <!-- Photo 3: Library - 268 of 310.JPG (Sep 29) -->
-        <div class="photo-card">
-            <div class="photo-wrapper">
-                <div class="rank-badge">3</div>
-                <div class="photo-placeholder">📸</div>
-            </div>
-            <div class="card-content">
-                <div class="card-month">SEPTEMBER</div>
-                <div class="card-date">Sep 29, 2023</div>
-                <div class="card-filename">Library - 268 of 310.JPG</div>
-                <div class="score-row">
-                    <div class="score-badge low">
-                        <div class="score-label">Combined</div>
-                        <div class="score-value">40</div>
-                    </div>
-                    <div class="score-badge high">
-                        <div class="score-label">Quality</div>
-                        <div class="score-value">100</div>
-                    </div>
-                    <div class="score-badge low">
-                        <div class="score-label">Emotional</div>
-                        <div class="score-value">0</div>
-                    </div>
-                </div>
+        <!-- October - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">October</div>
+                <div class="empty-hint">—</div>
             </div>
         </div>
 
-        <!-- Photo 4: Library - 260 of 310.jpeg (Tsillan Cellars) -->
-        <div class="photo-card">
-            <div class="photo-wrapper">
-                <div class="rank-badge">4</div>
-                <div class="photo-placeholder">🍷</div>
-            </div>
-            <div class="card-content">
-                <div class="card-month">SEPTEMBER</div>
-                <div class="card-date">Sep 03, 2023</div>
-                <div class="card-filename">Library - 260 of 310.jpeg</div>
-                <div class="score-row">
-                    <div class="score-badge low">
-                        <div class="score-label">Combined</div>
-                        <div class="score-value">40</div>
-                    </div>
-                    <div class="score-badge high">
-                        <div class="score-label">Quality</div>
-                        <div class="score-value">100</div>
-                    </div>
-                    <div class="score-badge low">
-                        <div class="score-label">Emotional</div>
-                        <div class="score-value">0</div>
-                    </div>
-                </div>
+        <!-- November - Empty -->
+        <div class="photo-card empty-month">
+            <div class="empty-month-content">
+                <div class="month-name">November</div>
+                <div class="empty-hint">—</div>
             </div>
         </div>
 
-        <!-- Photo 5: Library - 258 of 310.jpeg (Tsillan Cellars) -->
-        <div class="photo-card">
-            <div class="photo-wrapper">
-                <div class="rank-badge">5</div>
-                <div class="photo-placeholder">🍷</div>
-            </div>
-            <div class="card-content">
-                <div class="card-month">SEPTEMBER</div>
-                <div class="card-date">Sep 03, 2023</div>
-                <div class="card-filename">Library - 258 of 310.jpeg</div>
-                <div class="score-row">
-                    <div class="score-badge low">
-                        <div class="score-label">Combined</div>
-                        <div class="score-value">40</div>
-                    </div>
-                    <div class="score-badge high">
-                        <div class="score-label">Quality</div>
-                        <div class="score-value">100</div>
-                    </div>
-                    <div class="score-badge low">
-                        <div class="score-label">Emotional</div>
-                        <div class="score-value">0</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Photo 6: Library - 259 of 310.jpeg (Tsillan Cellars) -->
-        <div class="photo-card">
-            <div class="photo-wrapper">
-                <div class="rank-badge">6</div>
-                <div class="photo-placeholder">🍷</div>
-            </div>
-            <div class="card-content">
-                <div class="card-month">SEPTEMBER</div>
-                <div class="card-date">Sep 03, 2023</div>
-                <div class="card-filename">Library - 259 of 310.jpeg</div>
-                <div class="score-row">
-                    <div class="score-badge low">
-                        <div class="score-label">Combined</div>
-                        <div class="score-value">40</div>
-                    </div>
-                    <div class="score-badge high">
-                        <div class="score-label">Quality</div>
-                        <div class="score-value">100</div>
-                    </div>
-                    <div class="score-badge low">
-                        <div class="score-label">Emotional</div>
-                        <div class="score-value">0</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Photo 7: Library - 262 of 310.jpeg (Chelan) -->
-        <div class="photo-card">
-            <div class="photo-wrapper">
-                <div class="rank-badge">7</div>
-                <div class="photo-placeholder">📸</div>
-            </div>
-            <div class="card-content">
-                <div class="card-month">SEPTEMBER</div>
-                <div class="card-date">Sep 03, 2023</div>
-                <div class="card-filename">Library - 262 of 310.jpeg</div>
-                <div class="score-row">
-                    <div class="score-badge low">
-                        <div class="score-label">Combined</div>
-                        <div class="score-value">27</div>
-                    </div>
-                    <div class="score-badge medium">
-                        <div class="score-label">Quality</div>
-                        <div class="score-value">67</div>
-                    </div>
-                    <div class="score-badge low">
-                        <div class="score-label">Emotional</div>
-                        <div class="score-value">0</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Photo 8: Library - 299 of 310.JPG (December) -->
+        <!-- December - December scene -->
         <div class="photo-card">
             <div class="photo-wrapper">
                 <div class="rank-badge">8</div>
-                <div class="photo-placeholder">🎄</div>
+                <img src="photos/7.JPG" alt="December 2023" class="photo-image">
             </div>
             <div class="card-content">
                 <div class="card-month">DECEMBER</div>
@@ -511,8 +544,7 @@
     </div>
 </div>
 
-<!-- Materialize JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<!-- Optional: Add interaction JavaScript here if needed -->
 
 </body>
 </html>

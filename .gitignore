@@ -6,3 +6,14 @@ token.json
 # Codespace-generated directories
 .claude/
 app.log
+
+# Runtime database
+*.db
+remember_twelve.db
+
+# Photo cache/samples
+ui/photos/*.heic
+ui/photos/*.HEIC
+ui/photos/*.jpeg
+ui/photos/*.JPG
+ui/photos/*.jpg
