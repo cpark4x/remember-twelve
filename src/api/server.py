@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-from .routes import years_router, curations_router, swaps_router, sync_router
+from .routes import years_router, curations_router, curate_router, swaps_router, sync_router
 from .models import HealthResponse
 from .dependencies import get_connection, get_photos_dir
 
@@ -29,6 +29,7 @@ app.add_middleware(
 
 app.include_router(years_router)
 app.include_router(curations_router)
+app.include_router(curate_router)
 app.include_router(swaps_router)
 app.include_router(sync_router)
 

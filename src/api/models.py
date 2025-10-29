@@ -171,3 +171,61 @@ class ErrorResponse(BaseModel):
                 "error_code": "YEAR_NOT_FOUND"
             }
         }
+
+
+class CurateRequest(BaseModel):
+    year: int = Field(..., ge=1900, le=2100, description="Year to curate")
+    strategy: str = Field(default="balanced", description="Curation strategy")
+    force_refresh: bool = Field(default=False, description="Force re-curation even if one exists")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "year": 2024,
+                "strategy": "balanced",
+                "force_refresh": False
+            }
+        }
+
+
+class CurationStats(BaseModel):
+    photos_analyzed: int
+    photos_selected: int
+    strategy_used: str
+    duration_seconds: float
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "photos_analyzed": 487,
+                "photos_selected": 12,
+                "strategy_used": "balanced",
+                "duration_seconds": 2.3
+            }
+        }
+
+
+class CurateResponse(BaseModel):
+    curation_id: int
+    year: int
+    strategy: str
+    photos_analyzed: int
+    photos_selected: int
+    stats: Dict[str, Any]
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "curation_id": 1,
+                "year": 2024,
+                "strategy": "balanced",
+                "photos_analyzed": 487,
+                "photos_selected": 12,
+                "stats": {
+                    "photos_analyzed": 487,
+                    "photos_selected": 12,
+                    "strategy_used": "balanced",
+                    "duration_seconds": 2.3
+                }
+            }
+        }
