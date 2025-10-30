@@ -94,9 +94,33 @@ Then use agents like:
 
 ## Quick Start: Curate Your Photos
 
-Remember Twelve works with any photo collection - local files, Google Takeout exports, iCloud downloads, or camera rolls.
+Remember Twelve works with any photo collection - local files, Google Takeout exports, Apple Photos, or camera rolls.
 
-### Option A: Google Takeout (Recommended for Google Photos users)
+### Option A: Apple Photos (Easiest for Apple users) 🍎
+
+**Automated export on macOS:**
+
+```bash
+# Automatically export and curate 2023 photos
+./sync_photos.sh --apple-photos 2023
+
+# Export specific album
+./sync_photos.sh --apple-photos 2023 --album "Favorites"
+
+# Show manual instructions
+./sync_photos.sh --apple-photos 2023 --manual
+```
+
+**Or manual export (all platforms):**
+1. Open Photos app
+2. Filter by year: Search → `date:2023`
+3. Select all (`Cmd + A`)
+4. File → Export → Export Unmodified Originals
+5. Run: `./sync_photos.sh ~/Desktop/Photos2023 2023`
+
+📖 **Complete guide**: See [docs/APPLE_PHOTOS_GUIDE.md](docs/APPLE_PHOTOS_GUIDE.md)
+
+### Option B: Google Takeout (For Google Photos users)
 
 **⚠️ NOTE**: Google deprecated their Photos API in March 2025. Direct API access no longer works. Use Google Takeout instead.
 
@@ -121,7 +145,7 @@ Remember Twelve works with any photo collection - local files, Google Takeout ex
 
 📖 **Complete guide**: See [docs/GOOGLE_TAKEOUT_GUIDE.md](docs/GOOGLE_TAKEOUT_GUIDE.md)
 
-### Option B: Local Photo Folder
+### Option C: Local Photo Folder
 
 Works with any organized photo collection:
 
@@ -136,7 +160,7 @@ python curate_from_google_photos.py \
     --strategy balanced
 ```
 
-### Option C: Google Drive Sync
+### Option D: Google Drive Sync
 
 If you have Google Drive desktop app syncing your Photos:
 

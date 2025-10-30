@@ -5,7 +5,7 @@ Simple factory pattern for creating LocalPhotoSource or GooglePhotosSource
 based on user configuration.
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from pathlib import Path
 
 from .base import PhotoSource
@@ -147,6 +147,11 @@ class PhotoSourceFactory:
             LocalPhotoSource
 
         Example:
+            >>> # Apple Photos export
+            >>> source = PhotoSourceFactory.create_local_filesystem(
+            ...     '~/Desktop/Photos2023'
+            ... )
+            >>>
             >>> # Google Takeout
             >>> source = PhotoSourceFactory.create_local_filesystem(
             ...     '~/Downloads/Takeout/Google Photos'
@@ -159,3 +164,64 @@ class PhotoSourceFactory:
         """
         from .local_photo_source import LocalPhotoSource
         return LocalPhotoSource(path)
+
+    @staticmethod
+    def create_from_apple_photos(
+        year: int,
+        output_dir: Optional[str] = None,
+        album_name: Optional[str] = None,
+        manual: bool = False
+    ) -> PhotoSource:
+        """
+        Create photo source from Apple Photos (with automated export on macOS).
+
+        On macOS: Automatically exports photos via AppleScript
+        On other platforms: Shows manual export instructions
+
+        Args:
+            year: Year to export (e.g., 2023)
+            output_dir: Where to export (temp dir if None)
+            album_name: Optional album name to export from
+            manual: Force manual instructions instead of automation
+
+        Returns:
+            LocalPhotoSource pointing to exported photos
+
+        Raises:
+            RuntimeError: If export fails or user needs to export manually
+
+        Example:
+            >>> # Automated export (macOS)
+            >>> source = PhotoSourceFactory.create_from_apple_photos(
+            ...     year=2023
+            ... )
+            >>>
+            >>> # Export specific album
+            >>> source = PhotoSourceFactory.create_from_apple_photos(
+            ...     year=2023,
+            ...     album_name="Favorites"
+            ... )
+            >>>
+            >>> # Manual instructions
+            >>> source = PhotoSourceFactory.create_from_apple_photos(
+            ...     year=2023,
+            ...     manual=True
+            ... )
+        """
+        from .apple_photos_helper import export_from_apple_photos
+        from .local_photo_source import LocalPhotoSource
+
+        export_path, was_automated = export_from_apple_photos(
+            year=year,
+            output_dir=Path(output_dir) if output_dir else None,
+            album_name=album_name,
+            manual=manual
+        )
+
+        if export_path is None:
+            raise RuntimeError(
+                "Apple Photos export requires manual steps. "
+                "Follow instructions above, then use create_local_filesystem()"
+            )
+
+        return LocalPhotoSource(str(export_path))
