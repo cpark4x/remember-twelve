@@ -107,12 +107,55 @@ class PhotoSourceFactory:
         """
         Convenience method to create Google Photos source.
 
+        ⚠️ DEPRECATED: Google Photos API no longer works (scope deprecated March 2025).
+        Use create_local() or create_local_filesystem() instead with Google Takeout exports.
+        See GOOGLE_PHOTOS_DEPRECATION.md for details.
+
         Args:
             credentials_path: Path to OAuth credentials.json
             cache_dir: Optional cache directory
 
         Returns:
-            GooglePhotosSource
+            GooglePhotosSource (non-functional)
         """
+        import warnings
+        warnings.warn(
+            "create_google_photos() is deprecated. Google Photos API no longer works. "
+            "Use create_local() with Google Takeout exports instead. "
+            "See GOOGLE_PHOTOS_DEPRECATION.md",
+            DeprecationWarning,
+            stacklevel=2
+        )
         from .google_photos_source import GooglePhotosSource
         return GooglePhotosSource(credentials_path, cache_dir=cache_dir)
+
+    @staticmethod
+    def create_local_filesystem(path: str) -> PhotoSource:
+        """
+        Create a local filesystem photo source.
+
+        Recommended for:
+        - Google Takeout exports
+        - Local photo folders
+        - Google Drive sync folders
+        - Any organized photo collection
+
+        Args:
+            path: Directory path containing photos
+
+        Returns:
+            LocalPhotoSource
+
+        Example:
+            >>> # Google Takeout
+            >>> source = PhotoSourceFactory.create_local_filesystem(
+            ...     '~/Downloads/Takeout/Google Photos'
+            ... )
+            >>>
+            >>> # Local folder
+            >>> source = PhotoSourceFactory.create_local_filesystem(
+            ...     '~/Pictures/2023'
+            ... )
+        """
+        from .local_photo_source import LocalPhotoSource
+        return LocalPhotoSource(path)

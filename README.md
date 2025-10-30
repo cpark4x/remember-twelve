@@ -92,68 +92,98 @@ Then use agents like:
 
 ---
 
-## Quick Start: Curate from Google Photos
+## Quick Start: Curate Your Photos
 
-The complete Google Photos integration is now live! Curate your best 12 photos from any year directly from Google Photos.
+Remember Twelve works with any photo collection - local files, Google Takeout exports, iCloud downloads, or camera rolls.
+
+### Option A: Google Takeout (Recommended for Google Photos users)
+
+**⚠️ NOTE**: Google deprecated their Photos API in March 2025. Direct API access no longer works. Use Google Takeout instead.
+
+1. **Export Your Google Photos**:
+   - Go to https://takeout.google.com
+   - Select only "Google Photos"
+   - Filter by year (e.g., 2023)
+   - Download and extract the ZIP
+
+2. **Curate Your Photos**:
+   ```bash
+   # Point to your extracted Takeout folder
+   ./sync_photos.sh ~/Downloads/Takeout/Google\ Photos 2023
+
+   # Or use Python directly
+   python curate_from_google_photos.py \
+       --source ~/Downloads/Takeout/Google\ Photos \
+       --year 2023 \
+       --strategy balanced \
+       --flexible-months
+   ```
+
+📖 **Complete guide**: See [docs/GOOGLE_TAKEOUT_GUIDE.md](docs/GOOGLE_TAKEOUT_GUIDE.md)
+
+### Option B: Local Photo Folder
+
+Works with any organized photo collection:
+
+```bash
+# Curate from any local folder
+./sync_photos.sh ~/Pictures/2023 2023
+
+# Or be explicit
+python curate_from_google_photos.py \
+    --source ~/Pictures/2023 \
+    --year 2023 \
+    --strategy balanced
+```
+
+### Option C: Google Drive Sync
+
+If you have Google Drive desktop app syncing your Photos:
+
+```bash
+./sync_photos.sh ~/GoogleDrive/Google\ Photos 2023
+```
+
+### Curation Strategies
+
+Available strategies for different preferences:
+
+- `balanced` - Even quality + emotional significance (default)
+- `aesthetic_first` - Prioritize visual quality
+- `people_first` - Prioritize faces and emotions
+- `top_heavy` - More photos from best months
+
+Add `--flexible-months` to fill empty months with next-best photos.
+
+### The Curation Process
+
+1. ✅ Scan photo folder for specified year
+2. ✅ Analyze quality (sharpness, exposure, composition)
+3. ✅ Detect emotional significance (faces, emotions, intimacy)
+4. ✅ Apply AI curation algorithm with selected strategy
+5. ✅ Select best 12 photos with diversity
+6. ✅ Distribute across 12 months (flexibly if requested)
+7. ✅ Save results to `ui/photos_data.json`
+
+### View Your Remember Twelve
+
+```bash
+cd ui
+python3 sync_server.py
+
+# Open browser: http://localhost:8765
+```
 
 ### Setup (One-Time)
 
-1. **Get Google Cloud Credentials:**
-   ```bash
-   # 1. Go to https://console.cloud.google.com
-   # 2. Create project "Remember Twelve"
-   # 3. Enable Google Photos Library API
-   # 4. Create OAuth 2.0 credentials (Desktop app)
-   # 5. Download as google_photos_credentials.json
-   ```
-
-2. **Install Dependencies:**
-   ```bash
-   cd ~/dev/projects/remember-twelve
-   pip install -r requirements.txt
-   ```
-
-### Curate Photos
-
-**Option A: CLI (Simple)**
 ```bash
-# Curate your best 12 photos from 2023
-python curate_from_google_photos.py --year 2023
-
-# Use different strategy with flexible month distribution
-python curate_from_google_photos.py --year 2024 --strategy people_first --flexible-months
-
-# Strategies: balanced, aesthetic_first, people_first, top_heavy
+cd ~/dev/projects/remember-twelve
+pip install -r requirements.txt
 ```
 
-**Option B: Web Viewer with Sync (Better UX)**
-```bash
-# Terminal 1: Start photo server
-cd ui && python3 photo_server.py
+### Why Not Direct Google Photos API?
 
-# Terminal 2: Start sync server (optional)
-python3 ui/sync_server.py
-
-# Open browser: http://localhost:8000/viewer_dynamic.html
-# Click "Sync with Google Photos" button to fetch and curate
-```
-
-**Option C: Shell Script**
-```bash
-# One-command sync
-./sync_photos.sh 2023
-```
-
-The curation process:
-1. ✅ Authenticate with Google Photos (browser opens)
-2. ✅ Fetch all photos from specified year
-3. ✅ Analyze quality + emotional significance
-4. ✅ Apply AI curation algorithm
-5. ✅ Select best 12 photos with diversity
-6. ✅ Distribute flexibly across 12 months (optional)
-7. ✅ Save results with Google Photos links
-
-Results saved to `twelve_{year}_{strategy}.json` with clickable Google Photos links!
+See [GOOGLE_PHOTOS_DEPRECATION.md](GOOGLE_PHOTOS_DEPRECATION.md) for details on why the API no longer works and why local sources are better.
 
 ---
 
@@ -165,19 +195,21 @@ Results saved to `twelve_{year}_{strategy}.json` with clickable Google Photos li
 - ✅ Feature 1.1: Photo Quality Analyzer (Phase 1 & 2)
 - ✅ Feature 1.2: Emotional Significance Detector (Phase 1 & 2)
 - ✅ Feature 1.4: Twelve Curation Engine
-- ✅ **Feature 1.5: Google Photos Integration (Phase 1-3)** ← NEW!
+- ✅ Feature 1.5: Local File Source Integration (Phase 1-3)
+- ⚠️ ~~Google Photos API Integration~~ (deprecated by Google March 2025)
 
 **What Works Now:**
-- End-to-end curation from Google Photos
-- OAuth 2.0 authentication with encrypted token storage
+- End-to-end curation from any local photo source
+- Support for Google Takeout exports (includes rich metadata)
+- Support for any organized photo folder
 - AI quality analysis (sharpness, exposure, composition)
 - Emotional significance detection (faces, emotions, intimacy)
 - Balanced temporal distribution across months
 - Visual diversity filtering
 - **Flexible month distribution** (fills empty months with best available photos)
-- **Web viewer with sync button** (one-click Google Photos sync)
+- **Web viewer** for browsing curated photos
 - **Shell script bridge** for easy automation
-- Results with Google Photos links
+- Multiple curation strategies (balanced, aesthetic, people-first, etc.)
 
 ### Next Steps
 

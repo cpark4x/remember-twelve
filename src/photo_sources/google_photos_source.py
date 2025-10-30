@@ -1,7 +1,19 @@
 """
 GooglePhotosSource - Google Photos PhotoSource Implementation
 
-Implements PhotoSource interface for Google Photos with:
+⚠️ DEPRECATED: Google deprecated the photoslibrary.readonly scope on March 31, 2025.
+This integration NO LONGER WORKS and will always return 403 errors.
+
+Use local file sources instead:
+- Google Takeout exports (see docs/GOOGLE_TAKEOUT_GUIDE.md)
+- Local photo folders
+- Google Drive sync
+
+See GOOGLE_PHOTOS_DEPRECATION.md for details.
+
+---
+
+Legacy implementation (non-functional) kept for reference:
 - OAuth authentication
 - Photo listing by date
 - Temporary download and caching
@@ -9,6 +21,8 @@ Implements PhotoSource interface for Google Photos with:
 
 Phase 1: Authentication and basic photo listing (MVP)
 """
+
+import warnings
 
 import tempfile
 from pathlib import Path
@@ -49,11 +63,24 @@ class GooglePhotosSource(PhotoSource):
         """
         Initialize Google Photos source.
 
+        ⚠️ DEPRECATED: This source no longer works due to Google API deprecation.
+        Use local file sources instead. See GOOGLE_PHOTOS_DEPRECATION.md.
+
         Args:
             credentials_path: Path to OAuth credentials.json
             cache_dir: Optional cache directory (uses temp dir if None)
             token_manager: Optional TokenManager instance
         """
+        # Emit deprecation warning
+        warnings.warn(
+            "GooglePhotosSource is deprecated and non-functional. "
+            "Google deprecated the photoslibrary.readonly scope on March 31, 2025. "
+            "Use local file sources instead (Google Takeout, local folders, etc.). "
+            "See GOOGLE_PHOTOS_DEPRECATION.md for details.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+
         self.credentials_path = credentials_path
 
         # Setup cache directory
